@@ -1,0 +1,16 @@
+{
+  "source": "Unity",
+  "applications": [
+    {
+      "app_key": "application.generated.unity.vr_experiment_2.exe",
+      "launch_type": "url",
+      "url": "steam://launch/",
+      "action_manifest_path": "C:\\Users\\g8-baker\\Documents\\GitHub\\VR_Experiment_2\\actions.json",
+      "strings": {
+        "en_us": {
+          "name": "VR_Experiment_2 [Testing]"
+        }
+      }
+    }
+  ]
+}
