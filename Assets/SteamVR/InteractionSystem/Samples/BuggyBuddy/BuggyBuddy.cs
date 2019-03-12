@@ -116,7 +116,7 @@ namespace Valve.VR.InteractionSystem.Sample
             //TurretInput();
 
             //keyboard input for testing
-            //Vector3 move = Vector3.forward * Input.GetAxis("Vertical") + Vector3.right * Input.GetAxis("Horizontal");
+            // Vector3 move = Vector3.forward * Input.GetAxis("Vertical") + Vector3.right * Input.GetAxis("Horizontal");
 
 
             //driving input

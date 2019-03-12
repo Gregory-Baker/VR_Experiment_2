@@ -17,11 +17,11 @@ namespace Valve.VR
     public class SteamVR_Input_ActionSet_default : Valve.VR.SteamVR_ActionSet
     {
         
-        public virtual SteamVR_Action_Boolean InteractUI
+        public virtual SteamVR_Action_Boolean ConfirmTargetPos
         {
             get
             {
-                return SteamVR_Actions.default_InteractUI;
+                return SteamVR_Actions.default_ConfirmTargetPos;
             }
         }
         
@@ -86,14 +86,6 @@ namespace Valve.VR
             get
             {
                 return SteamVR_Actions.default_HeadsetOnHead;
-            }
-        }
-        
-        public virtual SteamVR_Action_Boolean Plant
-        {
-            get
-            {
-                return SteamVR_Actions.default_Plant;
             }
         }
         

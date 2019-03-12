@@ -901,7 +901,6 @@ namespace Valve.VR.InteractionSystem
 				else
                 {
                     teleportObject.transform.position = teleportPosition;
-
                 }
 			}
 			else

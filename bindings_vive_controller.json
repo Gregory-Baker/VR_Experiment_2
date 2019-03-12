@@ -3,6 +3,10 @@
    "app_key" : "application.generated.unity.vr_experiment_2.exe",
    "bindings" : {
       "/actions/buggy" : {
+         "chords" : [],
+         "haptics" : [],
+         "poses" : [],
+         "skeleton" : [],
          "sources" : [
             {
                "inputs" : {
@@ -102,15 +106,6 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/interactui"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "click" : {
                      "output" : "/actions/default/in/teleport"
                   }
                },
@@ -134,7 +129,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/grabpinch"
+                     "output" : "/actions/default/in/confirmtargetpos"
                   }
                },
                "mode" : "button",
@@ -148,16 +143,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/interactui"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/grabpinch"
+                     "output" : "/actions/default/in/confirmtargetpos"
                   }
                },
                "mode" : "button",
@@ -207,28 +193,14 @@
                },
                "mode" : "trigger",
                "path" : "/user/hand/right/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "double" : {
-                     "output" : "/actions/default/in/plant"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "double" : {
-                     "output" : "/actions/default/in/plant"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/trigger"
             }
          ]
       },
       "/actions/platformer" : {
+         "chords" : [],
+         "haptics" : [],
+         "poses" : [],
+         "skeleton" : [],
          "sources" : [
             {
                "inputs" : {
@@ -270,7 +242,7 @@
       }
    },
    "controller_type" : "vive_controller",
-   "description" : "Included Plant ",
+   "description" : "Included target move",
    "name" : "vive_controller",
    "options" : {},
    "simulated_actions" : []
