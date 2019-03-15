@@ -5,7 +5,7 @@
       "type": "boolean"
     },
     {
-      "name": "/actions/default/in/Teleport",
+      "name": "/actions/default/in/SelectTargetPos",
       "type": "boolean"
     },
     {
@@ -44,6 +44,14 @@
       "name": "/actions/default/in/StopRobot",
       "type": "boolean",
       "requirement": "suggested"
+    },
+    {
+      "name": "/actions/default/in/TurnClockwise",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/TurnAnticlockwise",
+      "type": "boolean"
     },
     {
       "name": "/actions/default/out/Haptic",
@@ -144,11 +152,13 @@
       "/actions/default/in/Pose": "Pose",
       "/actions/default/in/SkeletonLeftHand": "Skeleton (Left)",
       "/actions/default/in/SkeletonRightHand": "Skeleton (Right)",
-      "/actions/default/in/Teleport": "Teleport",
       "/actions/default/out/Haptic": "Haptic",
       "/actions/platformer/in/Jump": "Jump",
       "/actions/default/in/ConfirmTargetPos": "Move target to selected point",
-      "/actions/default/in/StopRobot": "Stop Robot"
+      "/actions/default/in/StopRobot": "Stop Robot",
+      "/actions/default/in/SelectTargetPos": "Select Target Position (using Teleport arc)",
+      "/actions/default/in/TurnClockwise": "Turn Clockwise",
+      "/actions/default/in/TurnAnticlockwise": "Turn Anticlockwise"
     }
   ]
 }

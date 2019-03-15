@@ -25,11 +25,11 @@ namespace Valve.VR
             }
         }
         
-        public virtual SteamVR_Action_Boolean Teleport
+        public virtual SteamVR_Action_Boolean SelectTargetPos
         {
             get
             {
-                return SteamVR_Actions.default_Teleport;
+                return SteamVR_Actions.default_SelectTargetPos;
             }
         }
         
@@ -94,6 +94,22 @@ namespace Valve.VR
             get
             {
                 return SteamVR_Actions.default_StopRobot;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean TurnClockwise
+        {
+            get
+            {
+                return SteamVR_Actions.default_TurnClockwise;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean TurnAnticlockwise
+        {
+            get
+            {
+                return SteamVR_Actions.default_TurnAnticlockwise;
             }
         }
         

@@ -19,7 +19,7 @@ namespace Valve.VR
         
         private static SteamVR_Action_Boolean p_default_ConfirmTargetPos;
         
-        private static SteamVR_Action_Boolean p_default_Teleport;
+        private static SteamVR_Action_Boolean p_default_SelectTargetPos;
         
         private static SteamVR_Action_Boolean p_default_GrabPinch;
         
@@ -36,6 +36,10 @@ namespace Valve.VR
         private static SteamVR_Action_Boolean p_default_HeadsetOnHead;
         
         private static SteamVR_Action_Boolean p_default_StopRobot;
+        
+        private static SteamVR_Action_Boolean p_default_TurnClockwise;
+        
+        private static SteamVR_Action_Boolean p_default_TurnAnticlockwise;
         
         private static SteamVR_Action_Vibration p_default_Haptic;
         
@@ -61,11 +65,11 @@ namespace Valve.VR
             }
         }
         
-        public static SteamVR_Action_Boolean default_Teleport
+        public static SteamVR_Action_Boolean default_SelectTargetPos
         {
             get
             {
-                return SteamVR_Actions.p_default_Teleport.GetCopy<SteamVR_Action_Boolean>();
+                return SteamVR_Actions.p_default_SelectTargetPos.GetCopy<SteamVR_Action_Boolean>();
             }
         }
         
@@ -130,6 +134,22 @@ namespace Valve.VR
             get
             {
                 return SteamVR_Actions.p_default_StopRobot.GetCopy<SteamVR_Action_Boolean>();
+            }
+        }
+        
+        public static SteamVR_Action_Boolean default_TurnClockwise
+        {
+            get
+            {
+                return SteamVR_Actions.p_default_TurnClockwise.GetCopy<SteamVR_Action_Boolean>();
+            }
+        }
+        
+        public static SteamVR_Action_Boolean default_TurnAnticlockwise
+        {
+            get
+            {
+                return SteamVR_Actions.p_default_TurnAnticlockwise.GetCopy<SteamVR_Action_Boolean>();
             }
         }
         
@@ -201,7 +221,7 @@ namespace Valve.VR
         {
             Valve.VR.SteamVR_Input.actions = new Valve.VR.SteamVR_Action[] {
                     SteamVR_Actions.default_ConfirmTargetPos,
-                    SteamVR_Actions.default_Teleport,
+                    SteamVR_Actions.default_SelectTargetPos,
                     SteamVR_Actions.default_GrabPinch,
                     SteamVR_Actions.default_GrabGrip,
                     SteamVR_Actions.default_Pose,
@@ -210,6 +230,8 @@ namespace Valve.VR
                     SteamVR_Actions.default_Squeeze,
                     SteamVR_Actions.default_HeadsetOnHead,
                     SteamVR_Actions.default_StopRobot,
+                    SteamVR_Actions.default_TurnClockwise,
+                    SteamVR_Actions.default_TurnAnticlockwise,
                     SteamVR_Actions.default_Haptic,
                     SteamVR_Actions.platformer_Move,
                     SteamVR_Actions.platformer_Jump,
@@ -220,7 +242,7 @@ namespace Valve.VR
                     SteamVR_Actions.mixedreality_ExternalCamera};
             Valve.VR.SteamVR_Input.actionsIn = new Valve.VR.ISteamVR_Action_In[] {
                     SteamVR_Actions.default_ConfirmTargetPos,
-                    SteamVR_Actions.default_Teleport,
+                    SteamVR_Actions.default_SelectTargetPos,
                     SteamVR_Actions.default_GrabPinch,
                     SteamVR_Actions.default_GrabGrip,
                     SteamVR_Actions.default_Pose,
@@ -229,6 +251,8 @@ namespace Valve.VR
                     SteamVR_Actions.default_Squeeze,
                     SteamVR_Actions.default_HeadsetOnHead,
                     SteamVR_Actions.default_StopRobot,
+                    SteamVR_Actions.default_TurnClockwise,
+                    SteamVR_Actions.default_TurnAnticlockwise,
                     SteamVR_Actions.platformer_Move,
                     SteamVR_Actions.platformer_Jump,
                     SteamVR_Actions.buggy_Steering,
@@ -245,11 +269,13 @@ namespace Valve.VR
                     SteamVR_Actions.mixedreality_ExternalCamera};
             Valve.VR.SteamVR_Input.actionsBoolean = new Valve.VR.SteamVR_Action_Boolean[] {
                     SteamVR_Actions.default_ConfirmTargetPos,
-                    SteamVR_Actions.default_Teleport,
+                    SteamVR_Actions.default_SelectTargetPos,
                     SteamVR_Actions.default_GrabPinch,
                     SteamVR_Actions.default_GrabGrip,
                     SteamVR_Actions.default_HeadsetOnHead,
                     SteamVR_Actions.default_StopRobot,
+                    SteamVR_Actions.default_TurnClockwise,
+                    SteamVR_Actions.default_TurnAnticlockwise,
                     SteamVR_Actions.platformer_Jump,
                     SteamVR_Actions.buggy_Brake,
                     SteamVR_Actions.buggy_Reset};
@@ -265,12 +291,14 @@ namespace Valve.VR
                     SteamVR_Actions.default_SkeletonRightHand};
             Valve.VR.SteamVR_Input.actionsNonPoseNonSkeletonIn = new Valve.VR.ISteamVR_Action_In[] {
                     SteamVR_Actions.default_ConfirmTargetPos,
-                    SteamVR_Actions.default_Teleport,
+                    SteamVR_Actions.default_SelectTargetPos,
                     SteamVR_Actions.default_GrabPinch,
                     SteamVR_Actions.default_GrabGrip,
                     SteamVR_Actions.default_Squeeze,
                     SteamVR_Actions.default_HeadsetOnHead,
                     SteamVR_Actions.default_StopRobot,
+                    SteamVR_Actions.default_TurnClockwise,
+                    SteamVR_Actions.default_TurnAnticlockwise,
                     SteamVR_Actions.platformer_Move,
                     SteamVR_Actions.platformer_Jump,
                     SteamVR_Actions.buggy_Steering,
@@ -282,7 +310,7 @@ namespace Valve.VR
         private static void PreInitActions()
         {
             SteamVR_Actions.p_default_ConfirmTargetPos = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/ConfirmTargetPos")));
-            SteamVR_Actions.p_default_Teleport = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/Teleport")));
+            SteamVR_Actions.p_default_SelectTargetPos = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/SelectTargetPos")));
             SteamVR_Actions.p_default_GrabPinch = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/GrabPinch")));
             SteamVR_Actions.p_default_GrabGrip = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/GrabGrip")));
             SteamVR_Actions.p_default_Pose = ((SteamVR_Action_Pose)(SteamVR_Action.Create<SteamVR_Action_Pose>("/actions/default/in/Pose")));
@@ -291,6 +319,8 @@ namespace Valve.VR
             SteamVR_Actions.p_default_Squeeze = ((SteamVR_Action_Single)(SteamVR_Action.Create<SteamVR_Action_Single>("/actions/default/in/Squeeze")));
             SteamVR_Actions.p_default_HeadsetOnHead = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/HeadsetOnHead")));
             SteamVR_Actions.p_default_StopRobot = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/StopRobot")));
+            SteamVR_Actions.p_default_TurnClockwise = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/TurnClockwise")));
+            SteamVR_Actions.p_default_TurnAnticlockwise = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/TurnAnticlockwise")));
             SteamVR_Actions.p_default_Haptic = ((SteamVR_Action_Vibration)(SteamVR_Action.Create<SteamVR_Action_Vibration>("/actions/default/out/Haptic")));
             SteamVR_Actions.p_platformer_Move = ((SteamVR_Action_Vector2)(SteamVR_Action.Create<SteamVR_Action_Vector2>("/actions/platformer/in/Move")));
             SteamVR_Actions.p_platformer_Jump = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/platformer/in/Jump")));

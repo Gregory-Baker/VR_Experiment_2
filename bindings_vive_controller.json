@@ -106,15 +106,6 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/teleport"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/trackpad"
-            },
-            {
-               "inputs" : {
-                  "click" : {
                      "output" : "/actions/default/in/confirmtargetpos"
                   }
                },
@@ -138,15 +129,6 @@
                   "click_deactivate_threshold" : "0.7"
                },
                "path" : "/user/hand/right/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/teleport"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/trackpad"
             },
             {
                "inputs" : {
@@ -183,6 +165,42 @@
                },
                "mode" : "button",
                "path" : "/user/hand/right/input/grip"
+            },
+            {
+               "inputs" : {
+                  "east" : {
+                     "output" : "/actions/default/in/turnclockwise"
+                  },
+                  "north" : {
+                     "output" : "/actions/default/in/selecttargetpos"
+                  },
+                  "west" : {
+                     "output" : "/actions/default/in/turnanticlockwise"
+                  }
+               },
+               "mode" : "dpad",
+               "parameters" : {
+                  "sub_mode" : "click"
+               },
+               "path" : "/user/hand/left/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "east" : {
+                     "output" : "/actions/default/in/turnclockwise"
+                  },
+                  "north" : {
+                     "output" : "/actions/default/in/selecttargetpos"
+                  },
+                  "west" : {
+                     "output" : "/actions/default/in/turnanticlockwise"
+                  }
+               },
+               "mode" : "dpad",
+               "parameters" : {
+                  "sub_mode" : "click"
+               },
+               "path" : "/user/hand/right/input/trackpad"
             }
          ]
       },
@@ -232,7 +250,7 @@
       }
    },
    "controller_type" : "vive_controller",
-   "description" : "Included stop robot",
+   "description" : "Included Dpad teleport + turn robot",
    "name" : "vive_controller",
    "options" : {},
    "simulated_actions" : []
