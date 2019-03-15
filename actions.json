@@ -41,6 +41,11 @@
       "requirement": "optional"
     },
     {
+      "name": "/actions/default/in/StopRobot",
+      "type": "boolean",
+      "requirement": "suggested"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },
@@ -142,7 +147,8 @@
       "/actions/default/in/Teleport": "Teleport",
       "/actions/default/out/Haptic": "Haptic",
       "/actions/platformer/in/Jump": "Jump",
-      "/actions/default/in/ConfirmTargetPos": "Move target to selected point"
+      "/actions/default/in/ConfirmTargetPos": "Move target to selected point",
+      "/actions/default/in/StopRobot": "Stop Robot"
     }
   ]
 }

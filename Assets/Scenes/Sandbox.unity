@@ -1201,6 +1201,25 @@ MonoBehaviour:
   objectToMove: {fileID: 1870077531}
   objectToTrack: {fileID: 470534097}
   verticalOffset: 0.01
+--- !u!114 &470128474
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 470128471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89c2b629e1bc97a41a38938639a9b0a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  confirmTargetAction:
+    actionPath: /actions/default/in/StopRobot
+    needsReinit: 0
+  hand: {fileID: 470128475}
+  objectToMove: {fileID: 1870077531}
+  objectToTrack: {fileID: 388068879}
+  verticalOffset: 0.01
 --- !u!114 &470128475 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 11401046, guid: dc06161b6d97feb419f45f03b62e14b9,
@@ -2018,6 +2037,25 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1893138394}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &760618927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 760618926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89c2b629e1bc97a41a38938639a9b0a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  confirmTargetAction:
+    actionPath: /actions/default/in/StopRobot
+    needsReinit: 0
+  hand: {fileID: 760618930}
+  objectToMove: {fileID: 1870077531}
+  objectToTrack: {fileID: 388068879}
+  verticalOffset: 0.01
 --- !u!114 &760618928
 MonoBehaviour:
   m_ObjectHideFlags: 0
