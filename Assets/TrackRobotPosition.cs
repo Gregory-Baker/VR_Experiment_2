@@ -61,7 +61,7 @@ public class TrackRobotPosition : MonoBehaviour
         playerTranslation.x = currentX - previousX;
         playerTranslation.z = currentZ - previousZ;
 
-        transform.Translate(playerTranslation);
+        transform.Translate(playerTranslation, Space.World);
 
         previousX = currentX;
         previousZ = currentZ;
@@ -82,7 +82,6 @@ public class TrackRobotPosition : MonoBehaviour
         {
             angleDiff += 360;
         }
-        angleDiff = Mathf.Abs(angleDiff);
 
         headRotationAngle = Mathf.Min(angleDiff, 1000); // maxTurnAnglePerSecond * Time.deltaTime);
 
