@@ -6,8 +6,6 @@ public class SlowDownTurn : MonoBehaviour
 {
     public float maxTurnAnglePerFrame = 1f;
 
-    int frame = 0;
-
     public float previousHeadAngle;
     public float currentHeadAngle;
     public float headAngleDiff;
@@ -38,9 +36,7 @@ public class SlowDownTurn : MonoBehaviour
         {
             print(headAngleDiff);
         }
-        // previousTransform = transform;
 
-        frame++;
         previousHeadAngle = transform.eulerAngles.y;
     }
 }
