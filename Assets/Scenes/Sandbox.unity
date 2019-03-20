@@ -98,7 +98,7 @@ NavMeshSettings:
   m_BuildSettings:
     serializedVersion: 2
     agentTypeID: 0
-    agentRadius: 0.5
+    agentRadius: 0.7
     agentHeight: 2
     agentSlope: 10
     agentClimb: 0.1
@@ -106,13 +106,13 @@ NavMeshSettings:
     maxJumpAcrossDistance: 0
     minRegionArea: 2
     manualCellSize: 0
-    cellSize: 0.16666667
+    cellSize: 0.23333333
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
     debug:
       m_Flags: 0
-  m_NavMeshData: {fileID: 23800000, guid: 147a2aa6b9383cd47ac63bb2353f1e93, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: e27517076ead2ed49958111f315095c6, type: 2}
 --- !u!1 &20582818
 GameObject:
   m_ObjectHideFlags: 0
@@ -1389,7 +1389,7 @@ GameObject:
   - component: {fileID: 470534100}
   - component: {fileID: 470534099}
   - component: {fileID: 470534098}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Target Disk (Selected)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2127,7 +2127,7 @@ MonoBehaviour:
   confirmTargetAction:
     actionPath: /actions/default/in/TurnClockwise
     needsReinit: 0
-  agent: {fileID: 0}
+  agent: {fileID: 388068879}
   hand: {fileID: 760618930}
   clockwiseTurn: 1
   angularSpeed: 15
@@ -2380,7 +2380,7 @@ Transform:
   m_GameObject: {fileID: 1107872704}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -1.2, y: 0.5, z: 0.8}
-  m_LocalScale: {x: 0.5, y: 0.4, z: 0.5}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_Children: []
   m_Father: {fileID: 109276162}
   m_RootOrder: 2
@@ -2929,7 +2929,7 @@ Transform:
   m_GameObject: {fileID: 1252092286}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 1.2, y: 0.5, z: 0.8}
-  m_LocalScale: {x: 0.5, y: 0.4, z: 0.5}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_Children: []
   m_Father: {fileID: 109276162}
   m_RootOrder: 3
@@ -3038,7 +3038,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.16666667
+  m_VoxelSize: 0.2
   m_BuildHeightMesh: 0
   m_NavMeshData: {fileID: 23800000, guid: fbbaa75490da3eb4786c280e10b2bec5, type: 2}
 --- !u!4 &1252912693
@@ -3300,7 +3300,7 @@ Transform:
   m_GameObject: {fileID: 1380933461}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -1.2, y: 0.5, z: -0.8}
-  m_LocalScale: {x: 0.5, y: 0.4, z: 0.5}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_Children: []
   m_Father: {fileID: 109276162}
   m_RootOrder: 0
@@ -3628,11 +3628,20 @@ MonoBehaviour:
   robot: {fileID: 388068879}
   egocentric: 1
   trackRotation: 1
-  maxTurnAnglePerSecond: 10
-  maxHeadRotationAcc: 1000
-  headRotationAngle: 0
-  headRotationVel: 0
-  headRotationAcc: 0
+  maxTurnAnglePerSecond: 100
+--- !u!114 &1662347161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1662347157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11b07c3b575abd1408e855630b0c6d84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowDirectTurn: 1
 --- !u!1 &1696187894
 GameObject:
   m_ObjectHideFlags: 0
@@ -3661,7 +3670,7 @@ Transform:
   m_GameObject: {fileID: 1696187894}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 1.2, y: 0.5, z: -0.8}
-  m_LocalScale: {x: 0.5, y: 0.4, z: 0.5}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_Children: []
   m_Father: {fileID: 109276162}
   m_RootOrder: 1
@@ -3939,7 +3948,7 @@ GameObject:
   - component: {fileID: 1870077534}
   - component: {fileID: 1870077533}
   - component: {fileID: 1870077532}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Target Disk (Confirmed)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

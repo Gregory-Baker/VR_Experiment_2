@@ -17,6 +17,8 @@ namespace Valve.VR.InteractionSystem
 
         [Tooltip("deg/sec")] public float angularSpeed = 1f;
 
+        Vector3 previousRobotPos;
+
         void OnEnable()
         {
             if (hand == null)
@@ -27,20 +29,26 @@ namespace Valve.VR.InteractionSystem
                 Debug.LogError("<b>[SteamVR Interaction]</b> No action assigned");
                 return;
             }
+
+            previousRobotPos = agent.transform.position;
         }
 
         void Update()
         {
-            if (IsActionButtonDown(hand) && IsEligibleForTurn())
+            if (IsActionButtonDown(hand))
             {
-                if (clockwiseTurn)
+                if (IsEligibleForTurn())
                 {
-                    agent.transform.Rotate(Vector3.up, angularSpeed * Time.deltaTime);
+                    if (clockwiseTurn)
+                    {
+                        agent.transform.Rotate(Vector3.up, angularSpeed * Time.deltaTime);
+                    }
+                    else
+                    {
+                        agent.transform.Rotate(Vector3.up, -angularSpeed * Time.deltaTime);
+                    }
                 }
-                else
-                {
-                    agent.transform.Rotate(Vector3.up, -angularSpeed * Time.deltaTime);
-                }
+                previousRobotPos = agent.transform.position;
             }
         }
 
@@ -49,10 +57,18 @@ namespace Valve.VR.InteractionSystem
             return confirmTargetAction.GetState(hand.handType);
         }
 
+        // Do not allow turning while agent is moving
         private bool IsEligibleForTurn()
         {
-            // todo - check that robot is stationary
-            return true;
+            float distanceMoved = Vector3.Distance(agent.transform.position, previousRobotPos);
+            if (distanceMoved < float.Epsilon)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ public class TrackRobotPosition : MonoBehaviour
     public GameObject robot;
 
     public bool egocentric = true;
-    public bool trackRotation = false;
+    public bool trackRotation = true;
 
     public float maxTurnAnglePerSecond = 10f;
 
@@ -43,6 +43,10 @@ public class TrackRobotPosition : MonoBehaviour
             {
                 TurnPlayerWithRobot();
             }
+        }
+        else
+        {
+            TurnPlayerTowardsRobot();
         }
     }
 
@@ -85,5 +89,10 @@ public class TrackRobotPosition : MonoBehaviour
         }
 
         transform.Rotate(transform.up, headRotationAngle);
+    }
+
+    private void TurnPlayerTowardsRobot()
+    {
+        transform.LookAt(robot.transform);
     }
 }
