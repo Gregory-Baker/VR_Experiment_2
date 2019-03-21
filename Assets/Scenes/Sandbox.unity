@@ -1181,7 +1181,7 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1893138394}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &470128473
+--- !u!114 &470128474
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1197,28 +1197,17 @@ MonoBehaviour:
     actionPath: /actions/default/in/ConfirmTargetPos
     needsReinit: 0
   hand: {fileID: 470128475}
-  objectToMove: {fileID: 1870077531}
-  objectToTrack: {fileID: 470534097}
+  confirmedTarget: {fileID: 1870077531}
+  interimTarget: {fileID: 1226327838}
+  selectedTarget: {fileID: 470534097}
+  robot: {fileID: 388068879}
   verticalOffset: 0.01
---- !u!114 &470128474
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 470128471}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89c2b629e1bc97a41a38938639a9b0a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  confirmTargetAction:
-    actionPath: /actions/default/in/StopRobot
-    needsReinit: 0
-  hand: {fileID: 470128475}
-  objectToMove: {fileID: 1870077531}
-  objectToTrack: {fileID: 388068879}
-  verticalOffset: 0.01
+  stopAndTurnOn: 1
+  robotRad: 0
+  targetInFrontAngle: 45
+  targetBehindAngle: 135
+  robotTurnRadius: 5
+  angularSpeed: 10
 --- !u!114 &470128475 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 11401046, guid: dc06161b6d97feb419f45f03b62e14b9,
@@ -1269,6 +1258,27 @@ MonoBehaviour:
   hand: {fileID: 470128475}
   clockwiseTurn: 0
   angularSpeed: 15
+--- !u!114 &470128479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 470128471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad005b8743ccd08468a9eadbad392ba6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  confirmTargetAction:
+    actionPath: /actions/default/in/StopRobot
+    needsReinit: 0
+  hand: {fileID: 470128475}
+  objectsToMove:
+  - {fileID: 1870077531}
+  - {fileID: 1226327838}
+  objectToTrack: {fileID: 388068879}
+  verticalOffset: 0.01
 --- !u!1 &470263910
 GameObject:
   m_ObjectHideFlags: 0
@@ -1389,7 +1399,7 @@ GameObject:
   - component: {fileID: 470534100}
   - component: {fileID: 470534099}
   - component: {fileID: 470534098}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Target Disk (Selected)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1405,7 +1415,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 470534097}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 0.5000001
   m_Height: 2
   m_Direction: 1
@@ -2065,6 +2075,7 @@ Transform:
   - {fileID: 919386710}
   - {fileID: 470534101}
   - {fileID: 1870077535}
+  - {fileID: 1226327839}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2083,14 +2094,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 760618926}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89c2b629e1bc97a41a38938639a9b0a3, type: 3}
+  m_Script: {fileID: 11500000, guid: ad005b8743ccd08468a9eadbad392ba6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   confirmTargetAction:
     actionPath: /actions/default/in/StopRobot
     needsReinit: 0
   hand: {fileID: 760618930}
-  objectToMove: {fileID: 1870077531}
+  objectsToMove:
+  - {fileID: 1870077531}
+  - {fileID: 1226327838}
   objectToTrack: {fileID: 388068879}
   verticalOffset: 0.01
 --- !u!114 &760618928
@@ -2109,9 +2122,17 @@ MonoBehaviour:
     actionPath: /actions/default/in/ConfirmTargetPos
     needsReinit: 0
   hand: {fileID: 760618930}
-  objectToMove: {fileID: 1870077531}
-  objectToTrack: {fileID: 470534097}
-  verticalOffset: 0.01
+  confirmedTarget: {fileID: 1870077531}
+  interimTarget: {fileID: 1226327838}
+  selectedTarget: {fileID: 470534097}
+  robot: {fileID: 388068879}
+  verticalOffset: 0
+  stopAndTurnOn: 1
+  robotRad: 0
+  targetInFrontAngle: 45
+  targetBehindAngle: 135
+  robotTurnRadius: 5
+  angularSpeed: 10
 --- !u!114 &760618929
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2901,6 +2922,98 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!1 &1226327838
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1226327839}
+  - component: {fileID: 1226327842}
+  - component: {fileID: 1226327841}
+  - component: {fileID: 1226327840}
+  m_Layer: 0
+  m_Name: Target Disk (Interim)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1226327839
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1226327838}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.02, z: 0}
+  m_LocalScale: {x: 0.3, y: 0.01, z: 0.3}
+  m_Children: []
+  m_Father: {fileID: 745349543}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &1226327840
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1226327838}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  m_Radius: 0.5000001
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!23 &1226327841
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1226327838}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 61aed2194d919044c803a1300870358d, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!33 &1226327842
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1226327838}
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1252092286
 GameObject:
   m_ObjectHideFlags: 0
@@ -3948,7 +4061,7 @@ GameObject:
   - component: {fileID: 1870077534}
   - component: {fileID: 1870077533}
   - component: {fileID: 1870077532}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: Target Disk (Confirmed)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3964,7 +4077,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 1870077531}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 0.5000001
   m_Height: 2
   m_Direction: 1

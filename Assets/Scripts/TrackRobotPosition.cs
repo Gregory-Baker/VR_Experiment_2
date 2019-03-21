@@ -12,6 +12,9 @@ public class TrackRobotPosition : MonoBehaviour
 
     public float maxTurnAnglePerSecond = 10f;
 
+    Vector3 robotPositionXZ;
+    Vector3 heading;
+
     float currentX;
     float currentZ;
     float previousX;
