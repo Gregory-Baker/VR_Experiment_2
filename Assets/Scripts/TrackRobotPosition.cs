@@ -49,7 +49,11 @@ public class TrackRobotPosition : MonoBehaviour
         }
         else
         {
-            TurnPlayerTowardsRobot();
+
+            if (trackRotation)
+            {
+                TurnPlayerTowardsRobot();
+            }
         }
     }
 
@@ -96,6 +100,9 @@ public class TrackRobotPosition : MonoBehaviour
 
     private void TurnPlayerTowardsRobot()
     {
-        transform.LookAt(robot.transform);
+        if (Vector3.Distance(robot.transform.position, transform.position) > 0.5f)
+        {
+            transform.LookAt(robot.transform);
+        }
     }
 }
