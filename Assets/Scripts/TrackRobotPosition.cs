@@ -5,10 +5,13 @@ using UnityEngine;
 
 public class TrackRobotPosition : MonoBehaviour
 {
+    public GameObject player;
     public GameObject robot;
 
     public bool egocentric = true;
     public bool trackRotation = true;
+
+    public GameObject teleportPlayerObject;
 
     public float maxTurnAnglePerSecond = 10f;
 
@@ -31,6 +34,11 @@ public class TrackRobotPosition : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (egocentric)
+        {
+            SetTeleportActive(false);
+        }
+
         previousX = robot.transform.position.x;
         previousZ = robot.transform.position.z;
     }
@@ -71,6 +79,12 @@ public class TrackRobotPosition : MonoBehaviour
         previousZ = currentZ;
     }
 
+    public void MovePlayerToRobotPos()
+    {
+        Vector3 heading = robot.transform.position - player.transform.position;
+        player.transform.Translate(heading);
+    }
+
     private void TurnPlayerWithRobot()
     {
         currentRobotAngle = robot.transform.eulerAngles.y;
@@ -104,5 +118,10 @@ public class TrackRobotPosition : MonoBehaviour
         {
             transform.LookAt(robot.transform);
         }
+    }
+
+    public void SetTeleportActive(bool input)
+    {
+        teleportPlayerObject.SetActive(input);
     }
 }

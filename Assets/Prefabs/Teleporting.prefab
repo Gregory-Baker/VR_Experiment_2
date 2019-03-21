@@ -977,7 +977,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 44162230}
-  - component: {fileID: 1387613183}
   - component: {fileID: 1387613182}
   - component: {fileID: 1387613181}
   m_Layer: 0
@@ -1013,68 +1012,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1387613183
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1387613180}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f260935093f73f241bfaa1578e5e5506, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  teleportAction:
-    actionPath: /actions/default/in/Teleport
-    needsReinit: 0
-  traceLayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  floorFixupTraceLayerMask:
-    serializedVersion: 2
-    m_Bits: 0
-  floorFixupMaximumTraceDistance: 1
-  areaVisibleMaterial: {fileID: 2100000, guid: 417e639b66cd3a24e9c5312be99ce3bd, type: 2}
-  areaLockedMaterial: {fileID: 2100000, guid: f6802bd638faedf4dbe4a57c1f222991, type: 2}
-  areaHighlightedMaterial: {fileID: 2100000, guid: a8cac5516702311429fe7478ff4d7d05,
-    type: 2}
-  pointVisibleMaterial: {fileID: 2100000, guid: 510c6e0b8b5c948458c2b4bc3de5a637,
-    type: 2}
-  pointLockedMaterial: {fileID: 2100000, guid: f855134cdd14ab54fa2838027b3eec2f, type: 2}
-  pointHighlightedMaterial: {fileID: 2100000, guid: f71819766ca687246a2150260bcfc1c5,
-    type: 2}
-  destinationReticleTransform: {fileID: 1640216672}
-  invalidReticleTransform: {fileID: 1326521399}
-  playAreaPreviewCorner: {fileID: 1470160281}
-  playAreaPreviewSide: {fileID: 1481125060}
-  pointerValidColor: {r: 0.11121324, g: 0.8897059, b: 0.11658211, a: 0.76862746}
-  pointerInvalidColor: {r: 0.8455882, g: 0.14300387, b: 0.14300387, a: 0.76862746}
-  pointerLockedColor: {r: 0.83823526, g: 0.5862563, b: 0.13559686, a: 0.76862746}
-  showPlayAreaMarker: 1
-  teleportFadeTime: 0
-  meshFadeTime: 0.2
-  arcDistance: 10
-  onActivateObjectTransform: {fileID: 1339517432}
-  onDeactivateObjectTransform: {fileID: 1407135844}
-  activateObjectTime: 0.1
-  deactivateObjectTime: 0.1
-  pointerAudioSource: {fileID: 1318019754}
-  loopingAudioSource: {fileID: 409807676}
-  headAudioSource: {fileID: 665087607}
-  reticleAudioSource: {fileID: 1697696142}
-  teleportSound: {fileID: 8300000, guid: e9befd794befe7540ad040be41dba757, type: 3}
-  pointerStartSound: {fileID: 8300000, guid: 7113854dded09be418cf3be1158d444c, type: 3}
-  pointerLoopSound: {fileID: 8300000, guid: 47b5e90896f0e004c85bebd26e6057e2, type: 3}
-  pointerStopSound: {fileID: 8300000, guid: aa9e211c83b607f479bd7772eb56a98c, type: 3}
-  goodHighlightSound: {fileID: 8300000, guid: 4e2e74504a83fbd438147cfda37cf3d0, type: 3}
-  badHighlightSound: {fileID: 8300000, guid: aa9e211c83b607f479bd7772eb56a98c, type: 3}
-  debugFloor: 0
-  showOffsetReticle: 0
-  offsetReticleTransform: {fileID: 113922089}
-  floorDebugSphere: {fileID: 1288694728}
-  floorDebugLine: {fileID: 1820385679}
-  teleportObject: {fileID: 0}
 --- !u!114 &1387613182
 MonoBehaviour:
   m_ObjectHideFlags: 0

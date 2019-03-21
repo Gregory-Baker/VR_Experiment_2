@@ -58,6 +58,10 @@
       "type": "boolean"
     },
     {
+      "name": "/actions/default/in/ToggleCameraView",
+      "type": "boolean"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },
@@ -94,7 +98,7 @@
   "action_sets": [
     {
       "name": "/actions/default",
-      "usage": "single"
+      "usage": "leftright"
     },
     {
       "name": "/actions/platformer",
@@ -163,7 +167,8 @@
       "/actions/default/in/SelectTargetPos": "Select Target Position (using Teleport arc)",
       "/actions/default/in/TurnClockwise": "Turn Clockwise",
       "/actions/default/in/TurnAnticlockwise": "Turn Anticlockwise",
-      "/actions/default/in/Teleport": "Teleport"
+      "/actions/default/in/Teleport": "Teleport",
+      "/actions/default/in/ToggleCameraView": "Toggle Camera View"
     }
   ]
 }

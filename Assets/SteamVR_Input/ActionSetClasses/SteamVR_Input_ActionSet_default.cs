@@ -121,6 +121,14 @@ namespace Valve.VR
             }
         }
         
+        public virtual SteamVR_Action_Boolean ToggleCameraView
+        {
+            get
+            {
+                return SteamVR_Actions.default_ToggleCameraView;
+            }
+        }
+        
         public virtual SteamVR_Action_Vibration Haptic
         {
             get

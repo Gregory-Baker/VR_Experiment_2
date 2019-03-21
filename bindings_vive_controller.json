@@ -106,7 +106,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/stoprobot"
+                     "output" : "/actions/default/in/togglecameraview"
                   }
                },
                "mode" : "button",
@@ -152,6 +152,9 @@
                   }
                },
                "mode" : "dpad",
+               "parameters" : {
+                  "sub_mode" : "click"
+               },
                "path" : "/user/hand/right/input/trackpad"
             },
             {
@@ -220,7 +223,7 @@
       }
    },
    "controller_type" : "vive_controller",
-   "description" : "Left controller controls Player in exocentric mode",
+   "description" : "Left controller controls Player in exocentric mode + toggle cam",
    "name" : "vive_controller",
    "options" : {},
    "simulated_actions" : []
