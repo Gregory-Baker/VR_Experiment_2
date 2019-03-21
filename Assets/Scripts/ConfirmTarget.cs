@@ -23,11 +23,15 @@ namespace Valve.VR.InteractionSystem
         public float robotRad;
         public float targetInFrontAngle = 45f;
         public float targetBehindAngle = 135f;
-        public float robotTurnRadius = 7f;
+        public float robotTurnRadius = 5f;
         public float angularSpeed = 10f;
+        public float veryCloseToTargetRad = 2.5f;
+        public float targetCloseFrontAngle = 20f;
+
 
         Vector3 robotToTargetVector;
         float angleToTarget;
+        float distanceToTarget;
 
         private void OnEnable()
         {
@@ -70,6 +74,9 @@ namespace Valve.VR.InteractionSystem
                     MoveTarget(interimTarget, targetPosition);
                     MoveTarget(confirmedTarget, targetPosition);
                 }
+
+                print("Distance to target: " + distanceToTarget);
+                print("Angle to target: " + angleToTarget);
             }
         }
 
@@ -88,10 +95,17 @@ namespace Valve.VR.InteractionSystem
 
             angleToTarget = Vector3.SignedAngle(robot.transform.forward, robotToTargetVector, robot.transform.up);
 
-            float distanceToTarget = Vector3.Distance(selectedTarget.transform.position, robot.transform.position);
+            distanceToTarget = Vector3.Distance(selectedTarget.transform.position, robot.transform.position);
 
-
-            if (Mathf.Abs(angleToTarget) < targetInFrontAngle)
+            if (Mathf.Abs(angleToTarget) < targetCloseFrontAngle)
+            {
+                return false;
+            }
+            else if (distanceToTarget < veryCloseToTargetRad)
+            {
+                return true;
+            }
+            else if (Mathf.Abs(angleToTarget) < targetInFrontAngle)
             {
                 return false;
             }
@@ -117,7 +131,6 @@ namespace Valve.VR.InteractionSystem
             {
                 if (TargetInStopAndTurnZone())
                 {
-                    print("turning");
                     robotToTargetVector = selectedTarget.transform.position - robot.transform.position;
                     angleToTarget = Vector3.SignedAngle(robot.transform.forward, robotToTargetVector, robot.transform.up);
                     robot.transform.Rotate(Vector3.up, Mathf.Sign(angleToTarget) * angularSpeed * Time.deltaTime);
