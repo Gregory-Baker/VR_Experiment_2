@@ -173,7 +173,7 @@ namespace Valve.VR.InteractionSystem
 		//-------------------------------------------------
 		void Start()
         {
-            teleportMarkers = GameObject.FindObjectsOfType<TeleportMarkerBase>();
+            teleportMarkers = GetComponentsInChildren<TeleportMarkerBase>();
 
 			HidePointer();
 

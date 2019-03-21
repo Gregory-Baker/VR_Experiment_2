@@ -106,56 +106,29 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/confirmtargetpos"
-                  }
-               },
-               "mode" : "button",
-               "parameters" : {
-                  "click_activate_threshold" : "0.75",
-                  "click_deactivate_threshold" : "0.7",
-                  "force_input" : "value"
-               },
-               "path" : "/user/hand/left/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/confirmtargetpos"
-                  }
-               },
-               "mode" : "button",
-               "parameters" : {
-                  "click_activate_threshold" : "0.75",
-                  "click_deactivate_threshold" : "0.7"
-               },
-               "path" : "/user/hand/right/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "pull" : {
-                     "output" : "/actions/default/in/squeeze"
-                  }
-               },
-               "mode" : "trigger",
-               "path" : "/user/hand/left/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "pull" : {
-                     "output" : "/actions/default/in/squeeze"
-                  }
-               },
-               "mode" : "trigger",
-               "path" : "/user/hand/right/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "click" : {
                      "output" : "/actions/default/in/stoprobot"
                   }
                },
                "mode" : "button",
                "path" : "/user/hand/left/input/grip"
+            },
+            {
+               "inputs" : {
+                  "east" : {
+                     "output" : "/actions/default/in/turnclockwise"
+                  },
+                  "north" : {
+                     "output" : "/actions/default/in/teleport"
+                  },
+                  "west" : {
+                     "output" : "/actions/default/in/turnanticlockwise"
+                  }
+               },
+               "mode" : "dpad",
+               "parameters" : {
+                  "sub_mode" : "click"
+               },
+               "path" : "/user/hand/left/input/trackpad"
             },
             {
                "inputs" : {
@@ -179,28 +152,25 @@
                   }
                },
                "mode" : "dpad",
-               "parameters" : {
-                  "sub_mode" : "click"
-               },
-               "path" : "/user/hand/left/input/trackpad"
+               "path" : "/user/hand/right/input/trackpad"
             },
             {
                "inputs" : {
-                  "east" : {
-                     "output" : "/actions/default/in/turnclockwise"
-                  },
-                  "north" : {
-                     "output" : "/actions/default/in/selecttargetpos"
-                  },
-                  "west" : {
-                     "output" : "/actions/default/in/turnanticlockwise"
+                  "click" : {
+                     "output" : "/actions/default/in/confirmtargetpos"
                   }
                },
-               "mode" : "dpad",
-               "parameters" : {
-                  "sub_mode" : "click"
+               "mode" : "button",
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/default/in/squeeze"
+                  }
                },
-               "path" : "/user/hand/right/input/trackpad"
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/trigger"
             }
          ]
       },
@@ -250,7 +220,7 @@
       }
    },
    "controller_type" : "vive_controller",
-   "description" : "Included Dpad teleport + turn robot",
+   "description" : "Left controller controls Player in exocentric mode",
    "name" : "vive_controller",
    "options" : {},
    "simulated_actions" : []
