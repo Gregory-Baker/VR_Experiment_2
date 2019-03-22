@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class TrackRobotPosition : MonoBehaviour
 {
-    public GameObject player;
     public GameObject robot;
 
     public bool egocentric = true;
@@ -81,8 +80,11 @@ public class TrackRobotPosition : MonoBehaviour
 
     public void MovePlayerToRobotPos()
     {
-        Vector3 heading = robot.transform.position - player.transform.position;
-        player.transform.Translate(heading);
+        Vector3 heading = robot.transform.position - transform.position;
+        print("Robot Position: " + robot.transform.position);
+        heading.y = 0;
+        // transform.Translate(heading, Space.World);
+        print("Player Position: " + transform.position);
     }
 
     private void TurnPlayerWithRobot()

@@ -1241,7 +1241,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 470128471}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 000f4911518504048a0c252b81cd80cb, type: 3}
   m_Name: 
@@ -1260,7 +1260,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 470128471}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 000f4911518504048a0c252b81cd80cb, type: 3}
   m_Name: 
@@ -4024,10 +4024,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 076962f5cdd99fa488fdfdac03323b4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 1662347157}
   robot: {fileID: 388068879}
-  egocentric: 0
-  trackRotation: 0
+  egocentric: 1
+  trackRotation: 1
   teleportPlayerObject: {fileID: 595749151}
   maxTurnAnglePerSecond: 100
 --- !u!114 &1662347161
@@ -4037,7 +4036,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1662347157}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 11b07c3b575abd1408e855630b0c6d84, type: 3}
   m_Name: 

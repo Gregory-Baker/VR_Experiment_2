@@ -49,7 +49,7 @@ namespace Valve.VR.InteractionSystem
             }
             else
             {
-                trackRobotScript.MovePlayerToRobotPos();
+                // trackRobotScript.MovePlayerToRobotPos();
                 trackRobotScript.SetTeleportActive(false);
             }
 
