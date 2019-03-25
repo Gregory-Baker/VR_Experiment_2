@@ -14,13 +14,8 @@ public class TrackRobotPosition : MonoBehaviour
 
     public float maxTurnAnglePerSecond = 10f;
 
-    Vector3 robotPositionXZ;
+    Vector3 previousRobotPosition;
     Vector3 heading;
-
-    float currentX;
-    float currentZ;
-    float previousX;
-    float previousZ;
 
     Vector3 playerTranslation;
 
@@ -29,17 +24,15 @@ public class TrackRobotPosition : MonoBehaviour
     float angleDiff;
     float headRotationAngle;
 
-
     // Start is called before the first frame update
     void Start()
     {
-        if (egocentric)
-        {
-            SetTeleportActive(false);
-        }
+        previousRobotPosition = robot.transform.position;
 
-        previousX = robot.transform.position.x;
-        previousZ = robot.transform.position.z;
+        //if (egocentric)
+        //{
+        //    SetTeleportActive(false);
+        //}
     }
 
     // Update is called once per frame
@@ -47,7 +40,8 @@ public class TrackRobotPosition : MonoBehaviour
     {
         if (egocentric)
         {
-            TranslatePlayerWithRobot();
+            //TranslatePlayerWithRobot();
+            MovePlayerToRobotPos();
 
             if (trackRotation)
             {
@@ -66,25 +60,19 @@ public class TrackRobotPosition : MonoBehaviour
 
     private void TranslatePlayerWithRobot()
     {
-        currentX = robot.transform.position.x;
-        currentZ = robot.transform.position.z;
-
-        playerTranslation.x = currentX - previousX;
-        playerTranslation.z = currentZ - previousZ;
+        playerTranslation = robot.transform.position - previousRobotPosition;
+        playerTranslation.y = 0;
 
         transform.Translate(playerTranslation, Space.World);
 
-        previousX = currentX;
-        previousZ = currentZ;
+        previousRobotPosition = robot.transform.position;
     }
 
     public void MovePlayerToRobotPos()
     {
         Vector3 heading = robot.transform.position - transform.position;
-        print("Robot Position: " + robot.transform.position);
         heading.y = 0;
-        // transform.Translate(heading, Space.World);
-        print("Player Position: " + transform.position);
+        transform.Translate(heading, Space.World);
     }
 
     private void TurnPlayerWithRobot()

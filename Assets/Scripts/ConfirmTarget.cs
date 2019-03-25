@@ -23,9 +23,9 @@ namespace Valve.VR.InteractionSystem
         public float robotRad;
         public float targetInFrontAngle = 45f;
         public float targetBehindAngle = 135f;
-        public float robotTurnRadius = 5f;
+        public float robotTurnRadius = 6f;
         public float angularSpeed = 10f;
-        public float veryCloseToTargetRad = 2.5f;
+        public float veryCloseToTargetRad = 3.5f;
         public float targetCloseFrontAngle = 20f;
 
 
@@ -62,8 +62,6 @@ namespace Valve.VR.InteractionSystem
 
                 Vector3 targetPosition = selectedTarget.transform.position;
                 targetPosition.y += verticalOffset;
-
-                // Vector3 objectToTarget = selectedTarget.transform.position - confirmedTarget.transform.position;
                 
                 if (TargetInStopAndTurnZone())
                 {
@@ -75,8 +73,8 @@ namespace Valve.VR.InteractionSystem
                     MoveTarget(confirmedTarget, targetPosition);
                 }
 
-                print("Distance to target: " + distanceToTarget);
-                print("Angle to target: " + angleToTarget);
+                // print("Distance to target: " + distanceToTarget);
+                // print("Angle to target: " + angleToTarget);
             }
         }
 
