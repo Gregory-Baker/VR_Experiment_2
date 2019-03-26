@@ -1310,7 +1310,7 @@ MonoBehaviour:
   - {fileID: 1226327838}
   linearSpeed: 0.5
   angularSpeed: 10
-  uiTextOn: 0
+  uiTextOn: 1
   directControlText: {fileID: 378522151}
   indirectControlText: {fileID: 1588519216}
 --- !u!1 &397928176
