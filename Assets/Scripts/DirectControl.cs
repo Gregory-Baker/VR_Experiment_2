@@ -23,6 +23,9 @@ namespace Valve.VR.InteractionSystem
         public float angularSpeed = 1f;
 
         private bool directControlOn = false;
+        public bool uiTextOn;
+        public GameObject directControlText;
+        public GameObject indirectControlText;
 
         void OnEnable()
         {
@@ -36,6 +39,10 @@ namespace Valve.VR.InteractionSystem
             }
 
             toggleControlMethod.AddOnChangeListener(OnConfirmActionChange, hand.handType);
+
+            directControlText.SetActive(false);
+            indirectControlText.SetActive(false);
+            SetUIText();
         }
 
         private void OnDisable()
@@ -53,11 +60,30 @@ namespace Valve.VR.InteractionSystem
                 {
                     EnableNavAgent(false);
                     EnableTargetDisks(false);
+                    SetUIText();
                 }
                 else
                 {
                     EnableNavAgent(true);
                     EnableTargetDisks(true);
+                    SetUIText();
+                }
+            }
+        }
+
+        private void SetUIText()
+        {
+            if (uiTextOn)
+            {
+                if (directControlOn)
+                {
+                    directControlText.SetActive(true);
+                    indirectControlText.SetActive(false);
+                }
+                else
+                {
+                    directControlText.SetActive(false);
+                    indirectControlText.SetActive(true);
                 }
             }
         }
