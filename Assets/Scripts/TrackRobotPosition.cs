@@ -108,24 +108,6 @@ public class TrackRobotPosition : MonoBehaviour
         currentPlayerAngle = transform.eulerAngles.y;
         float angleDiff = currentRobotAngle - currentPlayerAngle;
 
-        if (angleDiff > 180)
-        {
-            angleDiff -= 360;
-        }
-        else if (angleDiff < -180)
-        {
-            angleDiff += 360;
-        }
-
-        //if (Mathf.Abs(angleDiff) < maxTurnAnglePerSecond * Time.deltaTime)
-        //{
-        //    headRotationAngle = angleDiff;
-        //}
-        //else
-        //{
-        //    headRotationAngle = Mathf.Sign(angleDiff) * maxTurnAnglePerSecond * Time.deltaTime;
-        //}
-
         transform.Rotate(transform.up, angleDiff);
     }
 
