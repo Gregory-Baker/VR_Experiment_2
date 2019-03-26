@@ -21,14 +21,14 @@ public class TrackRobotPosition : MonoBehaviour
 
     float currentPlayerAngle;
     float currentRobotAngle;
-    float angleDiff;
+    float previousRobotAngle;
     float headRotationAngle;
 
     // Start is called before the first frame update
     void Start()
     {
         previousRobotPosition = robot.transform.position;
-
+        previousRobotAngle = robot.transform.eulerAngles.y;
         //if (egocentric)
         //{
         //    SetTeleportActive(false);
@@ -78,9 +78,7 @@ public class TrackRobotPosition : MonoBehaviour
     private void TurnPlayerWithRobot()
     {
         currentRobotAngle = robot.transform.eulerAngles.y;
-        currentPlayerAngle = transform.eulerAngles.y;
-        angleDiff = currentRobotAngle - currentPlayerAngle;
-
+        float angleDiff = currentRobotAngle - previousRobotAngle;
         if (angleDiff > 180)
         {
             angleDiff -= 360;
@@ -100,6 +98,35 @@ public class TrackRobotPosition : MonoBehaviour
         }
 
         transform.Rotate(transform.up, headRotationAngle);
+
+        previousRobotAngle = currentRobotAngle;
+    }
+
+    public void TurnPlayerToRobotHeading()
+    {
+        currentRobotAngle = robot.transform.eulerAngles.y;
+        currentPlayerAngle = transform.eulerAngles.y;
+        float angleDiff = currentRobotAngle - currentPlayerAngle;
+
+        if (angleDiff > 180)
+        {
+            angleDiff -= 360;
+        }
+        else if (angleDiff < -180)
+        {
+            angleDiff += 360;
+        }
+
+        //if (Mathf.Abs(angleDiff) < maxTurnAnglePerSecond * Time.deltaTime)
+        //{
+        //    headRotationAngle = angleDiff;
+        //}
+        //else
+        //{
+        //    headRotationAngle = Mathf.Sign(angleDiff) * maxTurnAnglePerSecond * Time.deltaTime;
+        //}
+
+        transform.Rotate(transform.up, angleDiff);
     }
 
     private void TurnPlayerTowardsRobot()

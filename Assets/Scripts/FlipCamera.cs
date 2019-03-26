@@ -3,18 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
 
+
 namespace Valve.VR.InteractionSystem
 {
-    public class ToggleCamera : MonoBehaviour
+    public class FlipCamera : MonoBehaviour
     {
         public SteamVR_Action_Boolean confirmTargetAction;
 
         public Hand hand;
 
+        public float rotationDegrees;
+
         private void OnEnable()
         {
             if (hand == null)
-                hand = this.GetComponent<Hand>();
+                hand = GetComponent<Hand>();
 
             if (confirmTargetAction == null)
             {
@@ -35,26 +38,15 @@ namespace Valve.VR.InteractionSystem
         {
             if (newValue)
             {
-                SwitchCameraModes();
+                RotateCamera(rotationDegrees);
             }
         }
 
-        public void SwitchCameraModes()
+        private void RotateCamera(float rotation)
         {
-            TrackRobotPosition trackRobotScript = GetComponentInParent<TrackRobotPosition>();
-
-            if (trackRobotScript.egocentric)
-            {
-                trackRobotScript.SetTeleportActive(true);
-            }
-            else
-            {
-                trackRobotScript.TurnPlayerToRobotHeading();
-                trackRobotScript.SetTeleportActive(false);
-            }
-
-            trackRobotScript.egocentric = !trackRobotScript.egocentric;
-            trackRobotScript.trackRotation = !trackRobotScript.trackRotation;
+            transform.Rotate(Vector3.up, rotation);
         }
+
+
     }
 }

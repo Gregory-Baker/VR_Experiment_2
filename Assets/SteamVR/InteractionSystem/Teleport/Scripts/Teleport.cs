@@ -113,7 +113,6 @@ namespace Valve.VR.InteractionSystem
 		SteamVR_Events.Action chaperoneInfoInitializedAction;
 
         [Header("Teleoport Objects")]
-
         public GameObject teleportObject;
 
 		// Events
@@ -317,15 +316,17 @@ namespace Valve.VR.InteractionSystem
 			Vector3 pointerEnd;
 			Vector3 pointerDir = pointerStartTransform.forward;
 			bool hitSomething = false;
-			bool showPlayAreaPreview = false;
+            bool showPlayAreaPreview = false;
 			Vector3 playerFeetOffset = player.trackingOriginTransform.position - player.feetPositionGuess;
 
 			Vector3 arcVelocity = pointerDir * arcDistance;
 
 			TeleportMarkerBase hitTeleportMarker = null;
 
-			//Check pointer angle
-			float dotUp = Vector3.Dot( pointerDir, Vector3.up );
+            bool hitRobot = false;
+            
+            //Check pointer angle
+            float dotUp = Vector3.Dot( pointerDir, Vector3.up );
 			float dotForward = Vector3.Dot( pointerDir, player.hmdTransform.forward );
 			bool pointerAtBadAngle = false;
 			if ( ( dotForward > 0 && dotUp > 0.75f ) || ( dotForward < 0.0f && dotUp > 0.5f ) )
@@ -340,7 +341,8 @@ namespace Valve.VR.InteractionSystem
 			{
 				hitSomething = true;
 				hitTeleportMarker = hitInfo.collider.GetComponentInParent<TeleportMarkerBase>();
-			}
+                hitRobot = hitInfo.collider.CompareTag("Robot");
+            }
 
 			if ( pointerAtBadAngle )
 			{
@@ -349,9 +351,9 @@ namespace Valve.VR.InteractionSystem
 
 			HighlightSelected( hitTeleportMarker );
 
-			if ( hitTeleportMarker != null ) //Hit a teleport marker
+			if ( hitTeleportMarker != null) //Hit a teleport marker
 			{
-				if ( hitTeleportMarker.locked )
+				if ( hitTeleportMarker.locked)
 				{
 					teleportArc.SetColor( pointerLockedColor );
 #if (UNITY_5_4)
@@ -420,14 +422,36 @@ namespace Valve.VR.InteractionSystem
 				destinationReticleTransform.gameObject.SetActive( false );
 				offsetReticleTransform.gameObject.SetActive( false );
 
-				teleportArc.SetColor( pointerInvalidColor );
+                if (hitRobot)
+                {
+                    teleportArc.SetColor(pointerLockedColor);
+#if (UNITY_5_4)
+					pointerLineRenderer.SetColors( pointerLockedColor, pointerLockedColor );
+#else
+                    pointerLineRenderer.startColor = pointerLockedColor;
+                    pointerLineRenderer.endColor = pointerLockedColor;
+#endif
+                    //hitRobotRenderer = hitInfo.collider.GetComponent<Renderer>();
+                    //if (hitRobotRenderer != null)
+                    //{
+                    //    hitRobotRenderer.material.EnableKeyword("_EMISSION");
+                    //}
+                    //else
+                    //{
+                    //    hitRobotRenderer.material.DisableKeyword("_EMISSION");
+                    //}
+                }
+                    else
+                {
+                    teleportArc.SetColor(pointerInvalidColor);
 #if (UNITY_5_4)
 				pointerLineRenderer.SetColors( pointerInvalidColor, pointerInvalidColor );
 #else
-				pointerLineRenderer.startColor = pointerInvalidColor;
-				pointerLineRenderer.endColor = pointerInvalidColor;
+                    pointerLineRenderer.startColor = pointerInvalidColor;
+                    pointerLineRenderer.endColor = pointerInvalidColor;
 #endif
-				invalidReticleTransform.gameObject.SetActive( !pointerAtBadAngle );
+                    invalidReticleTransform.gameObject.SetActive(!pointerAtBadAngle);
+                }
 
 				//Orient the invalid reticle to the normal of the trace hit point
 				Vector3 normalToUse = hitInfo.normal;

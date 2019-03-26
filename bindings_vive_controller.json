@@ -120,12 +120,16 @@
                   "north" : {
                      "output" : "/actions/default/in/teleport"
                   },
+                  "south" : {
+                     "output" : "/actions/default/in/flipcamera"
+                  },
                   "west" : {
                      "output" : "/actions/default/in/turnanticlockwise"
                   }
                },
                "mode" : "dpad",
                "parameters" : {
+                  "overlap_pct" : "0",
                   "sub_mode" : "click"
                },
                "path" : "/user/hand/left/input/trackpad"
@@ -153,6 +157,7 @@
                },
                "mode" : "dpad",
                "parameters" : {
+                  "overlap_pct" : "0",
                   "sub_mode" : "click"
                },
                "path" : "/user/hand/right/input/trackpad"
@@ -164,15 +169,6 @@
                   }
                },
                "mode" : "button",
-               "path" : "/user/hand/right/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "pull" : {
-                     "output" : "/actions/default/in/squeeze"
-                  }
-               },
-               "mode" : "trigger",
                "path" : "/user/hand/right/input/trigger"
             }
          ]
@@ -223,7 +219,7 @@
       }
    },
    "controller_type" : "vive_controller",
-   "description" : "Left controller controls Player in exocentric mode + toggle cam",
+   "description" : "Included flip camera 180 degrees + 0% overlap",
    "name" : "vive_controller",
    "options" : {},
    "simulated_actions" : []
