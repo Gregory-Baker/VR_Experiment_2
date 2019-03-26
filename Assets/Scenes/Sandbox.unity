@@ -880,6 +880,7 @@ GameObject:
   - component: {fileID: 388068882}
   - component: {fileID: 388068881}
   - component: {fileID: 388068883}
+  - component: {fileID: 388068884}
   m_Layer: 10
   m_Name: Robot
   m_TagString: Robot
@@ -1033,6 +1034,40 @@ LineRenderer:
     generateLightingData: 0
   m_UseWorldSpace: 1
   m_Loop: 0
+--- !u!114 &388068884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388068879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee61fba7d6123d4b8efe801e5bfda24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggleControlMethod:
+    actionPath: /actions/default/in/ToggleControlMethod
+    needsReinit: 0
+  forwardAction:
+    actionPath: /actions/default/in/Forward
+    needsReinit: 0
+  reverseAction:
+    actionPath: /actions/default/in/Backwards
+    needsReinit: 0
+  leftAction:
+    actionPath: /actions/default/in/Left
+    needsReinit: 0
+  rightAction:
+    actionPath: /actions/default/in/Right
+    needsReinit: 0
+  hand: {fileID: 760618930}
+  targetDisks:
+  - {fileID: 470534097}
+  - {fileID: 1870077531}
+  - {fileID: 1226327838}
+  linearSpeed: 0.5
+  angularSpeed: 10
 --- !u!1 &397928176
 GameObject:
   m_ObjectHideFlags: 0
@@ -1762,7 +1797,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 561206454}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.38, y: 5, z: 4.88}
+  m_LocalPosition: {x: -5.12, y: 5, z: 4.68}
   m_LocalScale: {x: 3, y: 5, z: 3}
   m_Children: []
   m_Father: {fileID: 1110933040}
@@ -3174,7 +3209,7 @@ MonoBehaviour:
   m_Center: {x: 0, y: 2, z: 0}
   m_LayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 311
   m_UseGeometry: 1
   m_DefaultArea: 0
   m_IgnoreNavMeshAgent: 1
@@ -4001,7 +4036,7 @@ MonoBehaviour:
   confirmTargetAction:
     actionPath: /actions/default/in/FlipCamera
     needsReinit: 0
-  hand: {fileID: 760618930}
+  hand: {fileID: 470128475}
   rotationDegrees: 180
 --- !u!114 &1662347159
 MonoBehaviour:

@@ -66,6 +66,26 @@
       "type": "boolean"
     },
     {
+      "name": "/actions/default/in/Forward",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/Backwards",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/Left",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/Right",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/ToggleControlMethod",
+      "type": "boolean"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },
@@ -173,7 +193,12 @@
       "/actions/default/in/TurnAnticlockwise": "Turn Anticlockwise",
       "/actions/default/in/Teleport": "Teleport",
       "/actions/default/in/ToggleCameraView": "Toggle Camera View",
-      "/actions/default/in/FlipCamera": "Flip Camera 180 degrees"
+      "/actions/default/in/FlipCamera": "Flip Camera 180 degrees",
+      "/actions/default/in/Forward": "Move robot forwards",
+      "/actions/default/in/Backwards": "Move robot backwards",
+      "/actions/default/in/Left": "Turn robot left",
+      "/actions/default/in/Right": "Turn robot right",
+      "/actions/default/in/ToggleControlMethod": "Toggle Control Method"
     }
   ]
 }

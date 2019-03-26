@@ -106,7 +106,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/togglecameraview"
+                     "output" : "/actions/default/in/togglecontrolmethod"
                   }
                },
                "mode" : "button",
@@ -115,21 +115,21 @@
             {
                "inputs" : {
                   "east" : {
-                     "output" : "/actions/default/in/turnclockwise"
+                     "output" : "/actions/default/in/right"
                   },
                   "north" : {
-                     "output" : "/actions/default/in/teleport"
+                     "output" : "/actions/default/in/forward"
                   },
                   "south" : {
-                     "output" : "/actions/default/in/flipcamera"
+                     "output" : "/actions/default/in/backwards"
                   },
                   "west" : {
-                     "output" : "/actions/default/in/turnanticlockwise"
+                     "output" : "/actions/default/in/left"
                   }
                },
                "mode" : "dpad",
                "parameters" : {
-                  "overlap_pct" : "0",
+                  "overlap_pct" : "25",
                   "sub_mode" : "click"
                },
                "path" : "/user/hand/left/input/trackpad"
@@ -150,6 +150,9 @@
                   },
                   "north" : {
                      "output" : "/actions/default/in/selecttargetpos"
+                  },
+                  "south" : {
+                     "output" : "/actions/default/in/flipcamera"
                   },
                   "west" : {
                      "output" : "/actions/default/in/turnanticlockwise"
@@ -219,7 +222,7 @@
       }
    },
    "controller_type" : "vive_controller",
-   "description" : "Included flip camera 180 degrees + 0% overlap",
+   "description" : "Direct (LHC) and Indirect (RHC) + 25% overlap + cam flip + toggle control method",
    "name" : "vive_controller",
    "options" : {},
    "simulated_actions" : []
