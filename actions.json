@@ -86,6 +86,18 @@
       "type": "boolean"
     },
     {
+      "name": "/actions/default/in/LookRight",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/LookLeft",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/TurnRobotToPlayer",
+      "type": "boolean"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },
@@ -198,7 +210,10 @@
       "/actions/default/in/Backwards": "Move robot backwards",
       "/actions/default/in/Left": "Turn robot left",
       "/actions/default/in/Right": "Turn robot right",
-      "/actions/default/in/ToggleControlMethod": "Toggle Control Method"
+      "/actions/default/in/ToggleControlMethod": "Toggle Control Method",
+      "/actions/default/in/LookRight": "Look Right",
+      "/actions/default/in/LookLeft": "Look Left",
+      "/actions/default/in/TurnRobotToPlayer": "Turn Robot To Player"
     }
   ]
 }

@@ -177,6 +177,30 @@ namespace Valve.VR
             }
         }
         
+        public virtual SteamVR_Action_Boolean LookRight
+        {
+            get
+            {
+                return SteamVR_Actions.default_LookRight;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean LookLeft
+        {
+            get
+            {
+                return SteamVR_Actions.default_LookLeft;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean TurnRobotToPlayer
+        {
+            get
+            {
+                return SteamVR_Actions.default_TurnRobotToPlayer;
+            }
+        }
+        
         public virtual SteamVR_Action_Vibration Haptic
         {
             get

@@ -434,6 +434,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 901348993}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &116200641 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1387613182, guid: 181a8285ba7518d4d9e0528f36e8fa60,
+    type: 3}
+  m_PrefabInstance: {fileID: 901348993}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f260935093f73f241bfaa1578e5e5506, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &165501487
 GameObject:
   m_ObjectHideFlags: 0
@@ -1123,6 +1135,7 @@ GameObject:
   - component: {fileID: 388068881}
   - component: {fileID: 388068883}
   - component: {fileID: 388068884}
+  - component: {fileID: 388068885}
   m_Layer: 10
   m_Name: Robot
   m_TagString: Robot
@@ -1304,15 +1317,34 @@ MonoBehaviour:
     actionPath: /actions/default/in/Right
     needsReinit: 0
   hand: {fileID: 760618930}
+  targetSelector: {fileID: 116200641}
   targetDisks:
   - {fileID: 470534097}
   - {fileID: 1870077531}
   - {fileID: 1226327838}
-  linearSpeed: 0.5
+  linearSpeed: 0.6
   angularSpeed: 10
   uiTextOn: 1
   directControlText: {fileID: 378522151}
   indirectControlText: {fileID: 1588519216}
+--- !u!114 &388068885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388068879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4f4e9eff9c83f24caf05c33c24b4f51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  confirmTargetAction:
+    actionPath: /actions/default/in/TurnRobotToPlayer
+    needsReinit: 0
+  hand: {fileID: 470128475}
+  player: {fileID: 1662347157}
+  angularSpeed: 10
 --- !u!1 &397928176
 GameObject:
   m_ObjectHideFlags: 0
@@ -4296,7 +4328,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 210.6, y: 164}
+  m_AnchoredPosition: {x: 198, y: 164}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!102 &1588519218
@@ -4448,6 +4480,23 @@ MonoBehaviour:
   trackRotation: 1
   teleportPlayerObject: {fileID: 595749151}
   maxTurnAnglePerSecond: 100
+--- !u!114 &1662347160
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1662347157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1908fa87f5657c4a9ee6b42e6501b4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  confirmTargetAction:
+    actionPath: /actions/default/in/LookLeft
+    needsReinit: 0
+  hand: {fileID: 470128475}
+  rotationDegrees: -90
 --- !u!114 &1662347161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4461,6 +4510,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowDirectTurn: 1
+--- !u!114 &1662347162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1662347157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1908fa87f5657c4a9ee6b42e6501b4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  confirmTargetAction:
+    actionPath: /actions/default/in/LookRight
+    needsReinit: 0
+  hand: {fileID: 470128475}
+  rotationDegrees: 90
 --- !u!1 &1696187894
 GameObject:
   m_ObjectHideFlags: 0

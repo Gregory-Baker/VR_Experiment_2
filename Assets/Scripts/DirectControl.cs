@@ -17,6 +17,7 @@ namespace Valve.VR.InteractionSystem
 
         public Hand hand;
 
+        public Teleport targetSelector;
         public GameObject[] targetDisks;
 
         public float linearSpeed = 0.5f;
@@ -58,12 +59,14 @@ namespace Valve.VR.InteractionSystem
                 directControlOn = !directControlOn;
                 if (directControlOn)
                 {
+                    targetSelector.GetComponent<Teleport>().enabled = false;
                     EnableNavAgent(false);
                     EnableTargetDisks(false);
                     SetUIText();
                 }
                 else
                 {
+                    targetSelector.GetComponent<Teleport>().enabled = true;
                     EnableNavAgent(true);
                     EnableTargetDisks(true);
                     SetUIText();

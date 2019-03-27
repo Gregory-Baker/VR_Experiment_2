@@ -146,7 +146,7 @@
             {
                "inputs" : {
                   "east" : {
-                     "output" : "/actions/default/in/turnclockwise"
+                     "output" : "/actions/default/in/lookright"
                   },
                   "north" : {
                      "output" : "/actions/default/in/selecttargetpos"
@@ -155,7 +155,7 @@
                      "output" : "/actions/default/in/flipcamera"
                   },
                   "west" : {
-                     "output" : "/actions/default/in/turnanticlockwise"
+                     "output" : "/actions/default/in/lookleft"
                   }
                },
                "mode" : "dpad",
@@ -222,7 +222,7 @@
       }
    },
    "controller_type" : "vive_controller",
-   "description" : "Direct (LHC) and Indirect (RHC) + 25% overlap + cam flip + toggle control method",
+   "description" : "Direct (LHC) and Indirect (RHC) + 25% overlap + cam flip + toggle control method + look L/R",
    "name" : "vive_controller",
    "options" : {},
    "simulated_actions" : []
