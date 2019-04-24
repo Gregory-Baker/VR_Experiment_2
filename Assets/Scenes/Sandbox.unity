@@ -1709,7 +1709,7 @@ MonoBehaviour:
   interimTarget: {fileID: 1226327838}
   selectedTarget: {fileID: 470534097}
   robot: {fileID: 388068879}
-  verticalOffset: 0.01
+  communicationDelay: 1
   stopAndTurnOn: 1
   robotRad: 0
   targetInFrontAngle: 45

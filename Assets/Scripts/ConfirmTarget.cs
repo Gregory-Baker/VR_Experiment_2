@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
@@ -16,7 +17,9 @@ namespace Valve.VR.InteractionSystem
         public GameObject selectedTarget;
         public GameObject robot;
 
-        public float verticalOffset = 0.01f;
+        [Tooltip("two way delay")]public float communicationDelay = 0f;
+
+        float verticalOffset = 0.01f; // used to raise confirmed target above selected target
 
         [Header("Stop and Turn")]
         public bool stopAndTurnOn = true;
@@ -27,6 +30,8 @@ namespace Valve.VR.InteractionSystem
         public float angularSpeed = 10f;
         public float veryCloseToTargetRad = 3.5f;
         public float targetCloseFrontAngle = 20f;
+
+        Vector3 targetPosition;
 
 
         Vector3 robotToTargetVector;
@@ -57,20 +62,21 @@ namespace Valve.VR.InteractionSystem
         {
             if (newValue)
             {
-                MoveTarget(confirmedTarget, robot.transform.position); //  + 0.1f * robot.transform.forward
                 MoveTarget(interimTarget, robot.transform.position);
 
-                Vector3 targetPosition = selectedTarget.transform.position;
+                targetPosition = selectedTarget.transform.position;
                 targetPosition.y += verticalOffset;
-                
+
                 if (TargetInStopAndTurnZone())
                 {
+                    // StopRobot(); // needs condition that ignores if the robot is stationary
+                    TurnToTarget();
                     MoveTarget(interimTarget, targetPosition);
                 }
                 else
                 {
                     MoveTarget(interimTarget, targetPosition);
-                    MoveTarget(confirmedTarget, targetPosition);
+                    StartCoroutine(MoveTargetCoroutine(communicationDelay));
                 }
 
                 // print("Distance to target: " + distanceToTarget);
@@ -81,6 +87,19 @@ namespace Valve.VR.InteractionSystem
         public void MoveTarget(GameObject gameObject, Vector3 position)
         {
             gameObject.transform.position = position;
+        }
+
+        private void TurnToTarget()
+        {
+            StartCoroutine(TurnToTargetCoroutine());
+        }
+
+        public void StopRobot()
+        {
+            float stoppingDistance = 0.3f;
+            Vector3 robotStoppingVector = robot.transform.forward * stoppingDistance;
+            MoveTarget(interimTarget, robot.transform.position);
+            MoveTarget(confirmedTarget, robot.transform.position + robotStoppingVector);
         }
 
         private bool TargetInStopAndTurnZone()
@@ -125,19 +144,39 @@ namespace Valve.VR.InteractionSystem
         {
             float distance = Vector3.Distance(interimTarget.transform.position, confirmedTarget.transform.position);
 
-            if (distance > 0.5f) // todo remove hard-coding of min dist
-            {
-                if (TargetInStopAndTurnZone())
-                {
-                    robotToTargetVector = selectedTarget.transform.position - robot.transform.position;
-                    angleToTarget = Vector3.SignedAngle(robot.transform.forward, robotToTargetVector, robot.transform.up);
-                    robot.transform.Rotate(Vector3.up, Mathf.Sign(angleToTarget) * angularSpeed * Time.deltaTime);
-                }
-                else
-                {
-                    MoveTarget(confirmedTarget, interimTarget.transform.position);
-                }
-            }
+            //if (distance > 0.5f) // todo remove hard-coding of min dist
+            //{
+            //    if (TargetInStopAndTurnZone())
+            //    {
+            //        robotToTargetVector = selectedTarget.transform.position - robot.transform.position;
+            //        angleToTarget = Vector3.SignedAngle(robot.transform.forward, robotToTargetVector, robot.transform.up);
+            //        robot.transform.Rotate(Vector3.up, Mathf.Sign(angleToTarget) * angularSpeed * Time.deltaTime);
+            //    }
+            //    else
+            //    {
+            //        MoveTarget(confirmedTarget, interimTarget.transform.position);
+            //    }
+            //}
         }
+
+        IEnumerator MoveTargetCoroutine(float delayTime)
+        {
+            yield return new WaitForSeconds(delayTime);
+            MoveTarget(confirmedTarget, targetPosition);
+        }
+
+        IEnumerator TurnToTargetCoroutine()
+        {
+
+            while (TargetInStopAndTurnZone())
+            {
+                robotToTargetVector = selectedTarget.transform.position - robot.transform.position;
+                angleToTarget = Vector3.SignedAngle(robot.transform.forward, robotToTargetVector, robot.transform.up);
+                robot.transform.Rotate(Vector3.up, Mathf.Sign(angleToTarget) * angularSpeed * Time.deltaTime);
+                yield return null;
+            }
+            MoveTarget(confirmedTarget, targetPosition);
+        }
+
     }
 }
