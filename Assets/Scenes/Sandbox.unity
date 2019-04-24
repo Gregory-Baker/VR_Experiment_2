@@ -1790,6 +1790,7 @@ MonoBehaviour:
   - {fileID: 1226327838}
   objectToTrack: {fileID: 388068879}
   verticalOffset: 0.01
+  communicationDelay: 1
 --- !u!1 &470263910
 GameObject:
   m_ObjectHideFlags: 0
@@ -2697,6 +2698,7 @@ MonoBehaviour:
   - {fileID: 1226327838}
   objectToTrack: {fileID: 388068879}
   verticalOffset: 0.01
+  communicationDelay: 0
 --- !u!114 &760618928
 MonoBehaviour:
   m_ObjectHideFlags: 0

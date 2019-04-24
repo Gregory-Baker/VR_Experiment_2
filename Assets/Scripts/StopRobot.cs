@@ -17,6 +17,8 @@ namespace Valve.VR.InteractionSystem
 
         public float verticalOffset = 0f;
 
+        public float communicationDelay = 0f;
+
         private void OnEnable()
         {
             if (hand == null)
@@ -41,12 +43,13 @@ namespace Valve.VR.InteractionSystem
         {
             if (newValue)
             {
-                MoveTarget();
+                StartCoroutine(MoveTargetCoroutine(communicationDelay));
             }
         }
 
-        public void MoveTarget()
+        IEnumerator MoveTargetCoroutine(float delayTime)
         {
+            yield return new WaitForSeconds(delayTime);
             Vector3 targetPosition = objectToTrack.transform.position;
             targetPosition.y += verticalOffset;
             foreach (GameObject objectToMove in objectsToMove)
