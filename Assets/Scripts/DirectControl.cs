@@ -23,6 +23,8 @@ namespace Valve.VR.InteractionSystem
         public float linearSpeed = 0.5f;
         public float angularSpeed = 1f;
 
+        [Tooltip("two way delay")] public float communicationDelay = 0f;
+
         private bool directControlOn = false;
         public bool uiTextOn;
         public GameObject directControlText;
@@ -121,24 +123,40 @@ namespace Valve.VR.InteractionSystem
             {
                 if (IsActionButtonDown(hand, forwardAction))
                 {
-                    transform.Translate(Vector3.forward * linearSpeed * Time.deltaTime);
+                    //transform.Translate(Vector3.forward * linearSpeed * Time.deltaTime);
+                    StartCoroutine(MoveRobotCoroutine(linearSpeed, communicationDelay));
                 }
 
                 if (IsActionButtonDown(hand, reverseAction))
                 {
-                    transform.Translate(Vector3.forward * -linearSpeed * Time.deltaTime);
+                    //transform.Translate(Vector3.forward * -linearSpeed * Time.deltaTime);
+                    StartCoroutine(MoveRobotCoroutine(-linearSpeed, communicationDelay));
                 }
 
                 if (IsActionButtonDown(hand, rightAction))
                 {
-                    transform.Rotate(transform.up * angularSpeed * Time.deltaTime);
+                    //transform.Rotate(transform.up * angularSpeed * Time.deltaTime);
+                    StartCoroutine(TurnRobotCoroutine(angularSpeed, communicationDelay));
                 }
 
                 if (IsActionButtonDown(hand, leftAction))
                 {
-                    transform.Rotate(transform.up * -angularSpeed * Time.deltaTime);
+                    //transform.Rotate(transform.up * -angularSpeed * Time.deltaTime);
+                    StartCoroutine(TurnRobotCoroutine(-angularSpeed, communicationDelay));
                 }
             }
+        }
+
+        IEnumerator MoveRobotCoroutine(float linearVelocity, float delayTime)
+        {
+            yield return new WaitForSeconds(delayTime);
+            transform.Translate(Vector3.forward * linearVelocity * Time.deltaTime);
+        }
+
+        IEnumerator TurnRobotCoroutine(float angularVelocity, float delayTime)
+        {
+            yield return new WaitForSeconds(delayTime);
+            transform.Rotate(transform.up * angularVelocity * Time.deltaTime);
         }
     }
 }
