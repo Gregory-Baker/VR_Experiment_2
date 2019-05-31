@@ -13,11 +13,11 @@ namespace Valve.VR.InteractionSystem
 
         public GameObject[] objectsToMove;
 
-        public GameObject objectToTrack;
+        public GameObject robot;
 
         public float verticalOffset = 0f;
 
-        public float communicationDelay = 0f;
+        float communicationDelay;
 
         private void OnEnable()
         {
@@ -31,6 +31,8 @@ namespace Valve.VR.InteractionSystem
             }
 
             confirmTargetAction.AddOnChangeListener(OnConfirmActionChange, hand.handType);
+
+            communicationDelay = robot.GetComponent<Status>().communicationDelay;
         }
 
         private void OnDisable()
@@ -50,7 +52,7 @@ namespace Valve.VR.InteractionSystem
         IEnumerator MoveTargetCoroutine(float delayTime)
         {
             yield return new WaitForSeconds(delayTime);
-            Vector3 targetPosition = objectToTrack.transform.position;
+            Vector3 targetPosition = robot.transform.position;
             targetPosition.y += verticalOffset;
             foreach (GameObject objectToMove in objectsToMove)
             {

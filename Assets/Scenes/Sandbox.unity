@@ -1320,6 +1320,7 @@ GameObject:
   - component: {fileID: 388068883}
   - component: {fileID: 388068884}
   - component: {fileID: 388068885}
+  - component: {fileID: 388068886}
   m_Layer: 10
   m_Name: Robot
   m_TagString: Robot
@@ -1508,7 +1509,6 @@ MonoBehaviour:
   - {fileID: 1226327838}
   linearSpeed: 0.6
   angularSpeed: 12
-  communicationDelay: 1
   uiTextOn: 0
   directControlText: {fileID: 378522151}
   indirectControlText: {fileID: 1588519216}
@@ -1530,6 +1530,20 @@ MonoBehaviour:
   hand: {fileID: 470128475}
   player: {fileID: 1662347157}
   angularSpeed: 10
+--- !u!114 &388068886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388068879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55bfe2e582367fd4bab2a057a68a6f5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  communicationDelay: 1
+  isMoving: 0
 --- !u!1 &397928176
 GameObject:
   m_ObjectHideFlags: 0
@@ -1710,14 +1724,13 @@ MonoBehaviour:
   interimTarget: {fileID: 1226327838}
   selectedTarget: {fileID: 470534097}
   robot: {fileID: 388068879}
-  communicationDelay: 1
   stopAndTurnOn: 1
   robotRad: 0
-  targetInFrontAngle: 45
-  targetBehindAngle: 135
+  targetInFrontAngle: 35
+  targetBehindAngle: 100
   robotTurnRadius: 6
-  angularSpeed: 10
-  veryCloseToTargetRad: 3.5
+  angularSpeed: 12
+  veryCloseToTargetRad: 4
   targetCloseFrontAngle: 20
 --- !u!114 &470128475 stripped
 MonoBehaviour:
@@ -1788,9 +1801,8 @@ MonoBehaviour:
   objectsToMove:
   - {fileID: 1870077531}
   - {fileID: 1226327838}
-  objectToTrack: {fileID: 388068879}
+  robot: {fileID: 388068879}
   verticalOffset: 0.01
-  communicationDelay: 1
 --- !u!1 &470263910
 GameObject:
   m_ObjectHideFlags: 0
@@ -2696,9 +2708,8 @@ MonoBehaviour:
   objectsToMove:
   - {fileID: 1870077531}
   - {fileID: 1226327838}
-  objectToTrack: {fileID: 388068879}
+  robot: {fileID: 0}
   verticalOffset: 0.01
-  communicationDelay: 0
 --- !u!114 &760618928
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4867,7 +4878,7 @@ MonoBehaviour:
     actionPath: /actions/default/in/LookLeft
     needsReinit: 0
   hand: {fileID: 470128475}
-  rotationDegrees: -90
+  rotationDegrees: -45
 --- !u!114 &1662347161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4897,7 +4908,7 @@ MonoBehaviour:
     actionPath: /actions/default/in/LookRight
     needsReinit: 0
   hand: {fileID: 470128475}
-  rotationDegrees: 90
+  rotationDegrees: 45
 --- !u!1 &1696187894
 GameObject:
   m_ObjectHideFlags: 0

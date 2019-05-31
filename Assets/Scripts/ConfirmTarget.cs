@@ -17,18 +17,18 @@ namespace Valve.VR.InteractionSystem
         public GameObject selectedTarget;
         public GameObject robot;
 
-        [Tooltip("two way delay")]public float communicationDelay = 0f;
+        float communicationDelay;
 
         float verticalOffset = 0.01f; // used to raise confirmed target above selected target
 
         [Header("Stop and Turn")]
         public bool stopAndTurnOn = true;
         public float robotRad;
-        public float targetInFrontAngle = 45f;
-        public float targetBehindAngle = 135f;
+        public float targetInFrontAngle = 35f;
+        public float targetBehindAngle = 100f;
         public float robotTurnRadius = 6f;
-        public float angularSpeed = 10f;
-        public float veryCloseToTargetRad = 3.5f;
+        public float angularSpeed = 12f;
+        public float veryCloseToTargetRad = 4f;
         public float targetCloseFrontAngle = 20f;
 
         Vector3 targetPosition;
@@ -50,6 +50,8 @@ namespace Valve.VR.InteractionSystem
             }
 
             confirmTargetAction.AddOnChangeListener(OnConfirmActionChange, hand.handType);
+
+            communicationDelay = robot.GetComponent<Status>().communicationDelay;
         }
 
         private void OnDisable()
@@ -91,7 +93,7 @@ namespace Valve.VR.InteractionSystem
 
         private void TurnToTarget()
         {
-            StartCoroutine(TurnToTargetCoroutine());
+            StartCoroutine(TurnToTargetCoroutine(communicationDelay));
         }
 
         public void StopRobot()
@@ -165,8 +167,14 @@ namespace Valve.VR.InteractionSystem
             MoveTarget(confirmedTarget, targetPosition);
         }
 
-        IEnumerator TurnToTargetCoroutine()
+        IEnumerator TurnToTargetCoroutine(float delayTime)
         {
+            yield return new WaitForSeconds(delayTime);
+            if (robot.GetComponent<Status>().isMoving)
+            {
+                StopRobot();
+            }
+            MoveTarget(interimTarget, targetPosition);
 
             while (TargetInStopAndTurnZone())
             {

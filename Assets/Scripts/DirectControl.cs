@@ -23,7 +23,7 @@ namespace Valve.VR.InteractionSystem
         public float linearSpeed = 0.5f;
         public float angularSpeed = 1f;
 
-        [Tooltip("two way delay")] public float communicationDelay = 0f;
+        float communicationDelay;
 
         private bool directControlOn = false;
         public bool uiTextOn;
@@ -46,6 +46,8 @@ namespace Valve.VR.InteractionSystem
             directControlText.SetActive(false);
             indirectControlText.SetActive(false);
             SetUIText();
+
+            communicationDelay = GetComponent<Status>().communicationDelay;
         }
 
         private void OnDisable()
