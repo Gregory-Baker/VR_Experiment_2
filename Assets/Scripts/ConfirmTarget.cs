@@ -115,40 +115,42 @@ namespace Valve.VR.InteractionSystem
 
         private bool TargetInStopAndTurnZone()
         {
-            if (!stopAndTurnOn) return false;
+            //if (!stopAndTurnOn) return false;
 
-            robotToTargetVector = selectedTarget.transform.position - robot.transform.position;
+            //robotToTargetVector = selectedTarget.transform.position - robot.transform.position;
 
-            robotToTargetVector.y = 0;
+            //robotToTargetVector.y = 0;
 
-            angleToTarget = Vector3.SignedAngle(robot.transform.forward, robotToTargetVector, robot.transform.up);
+            //angleToTarget = Vector3.SignedAngle(robot.transform.forward, robotToTargetVector, robot.transform.up);
 
-            distanceToTarget = Vector3.Distance(selectedTarget.transform.position, robot.transform.position);
+            //distanceToTarget = Vector3.Distance(selectedTarget.transform.position, robot.transform.position);
 
-            if (Mathf.Abs(angleToTarget) < targetCloseFrontAngle)
-            {
-                return false;
-            }
-            else if (distanceToTarget < veryCloseToTargetRad)
-            {
-                return true;
-            }
-            else if (Mathf.Abs(angleToTarget) < targetInFrontAngle)
-            {
-                return false;
-            }
-            else if (distanceToTarget < robotTurnRadius)
-            {
-                return true;
-            }
-            else if (Mathf.Abs(angleToTarget) > targetBehindAngle)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            //if (Mathf.Abs(angleToTarget) < targetCloseFrontAngle)
+            //{
+            //    return false;
+            //}
+            //else if (distanceToTarget < veryCloseToTargetRad)
+            //{
+            //    return true;
+            //}
+            //else if (Mathf.Abs(angleToTarget) < targetInFrontAngle)
+            //{
+            //    return false;
+            //}
+            //else if (distanceToTarget < robotTurnRadius)
+            //{
+            //    return true;
+            //}
+            //else if (Mathf.Abs(angleToTarget) > targetBehindAngle)
+            //{
+            //    return true;
+            //}
+            //else
+            //{
+            //    return false;
+            //}
+
+            return false;
         }
 
         void Update()
@@ -163,6 +165,7 @@ namespace Valve.VR.InteractionSystem
                     {
                         MoveToWaypoint(waypoints[1]);
                         waypoints.RemoveAt(0);
+                        //PlanPath()
                     }
                 }
             }
