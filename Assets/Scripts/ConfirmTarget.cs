@@ -33,6 +33,9 @@ namespace Valve.VR.InteractionSystem
 
         Vector3 targetPosition;
 
+        public List<Vector3> waypoints;
+        float distanceToNextWaypoint;
+        public float waypointAccuracyRad = 2f;
 
         Vector3 robotToTargetVector;
         float angleToTarget;
@@ -69,20 +72,26 @@ namespace Valve.VR.InteractionSystem
                 targetPosition = selectedTarget.transform.position;
                 targetPosition.y += verticalOffset;
 
-                if (TargetInStopAndTurnZone())
-                {
-                    // StopRobot(); // needs condition that ignores if the robot is stationary
-                    TurnToTarget();
-                    MoveTarget(interimTarget, targetPosition);
-                }
-                else
-                {
-                    MoveTarget(interimTarget, targetPosition);
-                    StartCoroutine(MoveTargetCoroutine(communicationDelay));
-                }
+                waypoints.Add(targetPosition);
 
-                // print("Distance to target: " + distanceToTarget);
-                // print("Angle to target: " + angleToTarget);
+                if (waypoints.Count == 1)
+                {
+                    MoveToWaypoint(waypoints[0]);
+                }
+            }
+        }
+
+        private void MoveToWaypoint(Vector3 waypointPosition)
+        {
+            if (TargetInStopAndTurnZone())
+            {
+                TurnToTarget();
+                MoveTarget(interimTarget, waypointPosition);
+            }
+            else
+            {
+                MoveTarget(interimTarget, waypointPosition);
+                StartCoroutine(MoveTargetCoroutine(communicationDelay));
             }
         }
 
@@ -144,21 +153,19 @@ namespace Valve.VR.InteractionSystem
 
         void Update()
         {
-            float distance = Vector3.Distance(interimTarget.transform.position, confirmedTarget.transform.position);
+            if (waypoints.Count > 0)
+            {
+                distanceToNextWaypoint = Vector3.Distance(waypoints[0], robot.transform.position);
 
-            //if (distance > 0.5f) // todo remove hard-coding of min dist
-            //{
-            //    if (TargetInStopAndTurnZone())
-            //    {
-            //        robotToTargetVector = selectedTarget.transform.position - robot.transform.position;
-            //        angleToTarget = Vector3.SignedAngle(robot.transform.forward, robotToTargetVector, robot.transform.up);
-            //        robot.transform.Rotate(Vector3.up, Mathf.Sign(angleToTarget) * angularSpeed * Time.deltaTime);
-            //    }
-            //    else
-            //    {
-            //        MoveTarget(confirmedTarget, interimTarget.transform.position);
-            //    }
-            //}
+                if (distanceToNextWaypoint < waypointAccuracyRad)
+                {
+                    if (waypoints.Count > 1)
+                    {
+                        MoveToWaypoint(waypoints[1]);
+                        waypoints.RemoveAt(0);
+                    }
+                }
+            }
         }
 
         IEnumerator MoveTargetCoroutine(float delayTime)
