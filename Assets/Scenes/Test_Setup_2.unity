@@ -4718,16 +4718,14 @@ MonoBehaviour:
   interimTarget: {fileID: 1226327838}
   selectedTarget: {fileID: 470534097}
   robot: {fileID: 388068879}
-  stopAndTurnOn: 1
+  navmesh: {fileID: 1252912692}
+  stopAndTurnOn: 0
   robotRad: 0
-  targetInFrontAngle: 35
-  targetBehindAngle: 100
-  robotTurnRadius: 6
   angularSpeed: 12
-  veryCloseToTargetRad: 4
-  targetCloseFrontAngle: 20
   waypoints: []
-  waypointAccuracyRad: 2
+  waypointAccuracyRad: 1
+  robotTurnRadius: 1
+  chordLength: 0.4
 --- !u!114 &470128475 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 11401046, guid: dc06161b6d97feb419f45f03b62e14b9,
