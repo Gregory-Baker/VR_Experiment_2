@@ -154,7 +154,7 @@ namespace Valve.VR.InteractionSystem
 
         public void PlanPath(Vector3 startPos, float startHead, Vector3 targetPos)
         {
-            var pathParams = BakerPath(startPos, startHead, targetPos);
+            var pathParams = BBPath(startPos, startHead, targetPos);
 
             if (!pathParams.Item3)
             {
@@ -162,7 +162,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        private Tuple<float, float, bool> BakerPath(Vector3 startPos, float startHead, Vector3 targetPos)
+        private Tuple<float, float, bool> BBPath(Vector3 startPos, float startHead, Vector3 targetPos)
         {
             float turn_angle = 0;
             float straight_distance = 0;
