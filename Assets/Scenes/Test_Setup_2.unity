@@ -4725,7 +4725,7 @@ MonoBehaviour:
   angularSpeed: 12
   waypoints: []
   waypointAccuracyRad: 0.4
-  robotTurnRadius: 2
+  robotTurnRadius: 1
   chordLength: 0.4
 --- !u!114 &470128475 stripped
 MonoBehaviour:

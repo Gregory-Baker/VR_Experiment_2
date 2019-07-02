@@ -124,6 +124,26 @@ namespace Valve.VR.InteractionSystem
             //var pathInfo = BakerPath(testTarget);
 
 
+            Vector2 x1 = new Vector2(-1, -2);
+            float heading = 3*pi/4;
+            Vector2 x2 = new Vector2(2, 4);
+            Vector2 x3 = new Vector2(11, 1);
+            Vector2 x4 = new Vector2(15, 5);
+
+            List<Vector2> waypoints = new List<Vector2>();
+            //waypoints.Add(x1);
+            waypoints.Add(x2);
+            waypoints.Add(x3);
+            waypoints.Add(x4);
+
+            var path_params = PathPlan.BBPath(x1, heading, waypoints, robotTurnRadius);
+
+            for (int i = 0; i < path_params.Item1.Count; i++)
+            {
+                print("Turn angle: " + path_params.Item1[i]);
+                print("Straight Distance: " + path_params.Item2[i]);
+                print("Satellite Turn: " + path_params.Item3[i]);
+            }
         }
 
         private void OnDisable()
