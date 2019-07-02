@@ -117,7 +117,7 @@ namespace Valve.VR.InteractionSystem
             deltaXY[1].x = chordLength;
 
             deltaXY[2].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
-            deltaXY[2].y = - robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
+            deltaXY[2].y = -robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
 
             Vector2 testTarget = new Vector2(-12.5f, 5.0f);
 
@@ -125,7 +125,7 @@ namespace Valve.VR.InteractionSystem
 
 
             Vector2 x1 = new Vector2(-1, -2);
-            float heading = 3*pi/4;
+            float heading = 3 * pi / 4;
             Vector2 x2 = new Vector2(2, 4);
             Vector2 x3 = new Vector2(11, 1);
             Vector2 x4 = new Vector2(15, 5);
@@ -136,14 +136,17 @@ namespace Valve.VR.InteractionSystem
             waypoints.Add(x3);
             waypoints.Add(x4);
 
-            var path_params = PathPlan.BBPath(x1, heading, waypoints, robotTurnRadius);
+            var pathInfo = PathPlan.BBInfo(x1, heading, waypoints, robotTurnRadius);
 
-            for (int i = 0; i < path_params.Item1.Count; i++)
-            {
-                print("Turn angle: " + path_params.Item1[i]);
-                print("Straight Distance: " + path_params.Item2[i]);
-                print("Satellite Turn: " + path_params.Item3[i]);
-            }
+            var pathInstructions = PathPlan.BBInstructions(pathInfo);
+            PathPlan.PrintBBPathInstructions(pathInstructions);
+
+            var pathPoints = PathPlan.BBPathPoints(pathInfo);
+            pathPoints.Insert(0, PathPlan.V2toV3(x1));
+            pathPoints.Add(PathPlan.V2toV3(x4));
+
+            OnDrawGizmosSelected(line, pathPoints);
+
         }
 
         private void OnDisable()
@@ -508,6 +511,20 @@ namespace Valve.VR.InteractionSystem
         void OnDrawGizmosSelected(LineRenderer line, Vector3[] path)
         {
             line.positionCount = path.Length;
+
+            int i = 0;
+
+            foreach (Vector3 node in path)
+            {
+                line.SetPosition(i, node);
+                i++;
+            }
+
+        }
+
+        void OnDrawGizmosSelected(LineRenderer line, List<Vector3> path)
+        {
+            line.positionCount = path.Count;
 
             int i = 0;
 

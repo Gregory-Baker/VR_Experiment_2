@@ -23,6 +23,23 @@ public class PathPlan : MonoBehaviour
         return x_rot;
     }
 
+    public class BBPathInstructions
+    {
+        public List<float> Angles { get; set; }
+        public List<float> Distances { get; set; }
+        public List<bool> SatelliteTurns { get; set; }
+
+        public BBPathInstructions(List<float> turn_angles,
+            List<float> straight_distances,
+            List<bool> satellite_turns)
+        {
+            Angles = turn_angles;
+            Distances = straight_distances;
+            SatelliteTurns = satellite_turns;
+        }
+    }
+
+
     public class TurningCircleInfo
     {
         public float A { get; set; }
@@ -149,7 +166,30 @@ public class PathPlan : MonoBehaviour
         return turningCircleInfo;
     }
 
-    public static Tuple<List<float>, List<float>, List<bool>> BBPath(Vector2 pos, float heading, List<Vector2> waypoints, float r_t, float r_max=0)
+    public static List<TurningCircleInfo> BBInfo(Vector2 pos, float heading, List<Vector2> waypoints, float r_t, float r_max = 0)
+    {
+        List<TurningCircleInfo> turningCircleInfos = new List<TurningCircleInfo>
+        {
+            FindTurningCircle(pos, waypoints[0], heading, r_t)
+        };
+
+        for (int i = 0; i < waypoints.Count - 1; i++)
+        {
+            if (i == 0)
+            {
+                turningCircleInfos.Add(FindTurningCircle(turningCircleInfos[0].XP1, waypoints[i], waypoints[i + 1], r_t, r_max));
+            }
+            else
+            {
+                turningCircleInfos.Add(FindTurningCircle(waypoints[i - 1], waypoints[i], waypoints[i + 1], r_t, r_max));
+            }
+        }
+
+        return turningCircleInfos;
+
+    }
+
+    public static BBPathInstructions BBInstructions(List<TurningCircleInfo> pathInfo)
     {
         List<float> turn_angles = new List<float>();
         List<float> straight_distances = new List<float>();
@@ -157,39 +197,90 @@ public class PathPlan : MonoBehaviour
 
         List<float> waypoint_distances = new List<float>();
         List<float> offsets = new List<float>();
-        float straight_distance;
 
-        TurningCircleInfo turningCircleInfo = FindTurningCircle(pos, waypoints[0], heading, r_t);
-
-        turn_angles.Add(turningCircleInfo.A);
-        waypoint_distances.Add(turningCircleInfo.D);
-        offsets.Add(0f);
-        satellite_turns.Add(false);
-
-
-        for (int i = 0; i < waypoints.Count - 1; i++)
+        for (int i = 0; i < pathInfo.Count; i++)
         {
             if (i == 0)
             {
-                turningCircleInfo = FindTurningCircle(turningCircleInfo.XP1, waypoints[i], waypoints[i + 1], r_t, r_max);
+                turn_angles.Add(pathInfo[i].A);
+                waypoint_distances.Add(pathInfo[i].D);
+                offsets.Add(0f);
+                satellite_turns.Add(false);
             }
             else
             {
-                turningCircleInfo = FindTurningCircle(waypoints[i - 1], waypoints[i], waypoints[i + 1], r_t, r_max);
+                turn_angles.Add(pathInfo[i].A);
+                offsets.Add(pathInfo[i].O);
+                waypoint_distances.Add(pathInfo[i].D);
+                straight_distances.Add(waypoint_distances[i - 1] - offsets[i - 1] - offsets[i]);
+                satellite_turns.Add(pathInfo[i].ST);
             }
-
-            turn_angles.Add(turningCircleInfo.A);
-            offsets.Add(turningCircleInfo.O);
-            waypoint_distances.Add(turningCircleInfo.D);
-            straight_distance = waypoint_distances[i] - offsets[i] - offsets[i + 1];
-            straight_distances.Add(straight_distance);
-            satellite_turns.Add(turningCircleInfo.ST);
         }
 
-        straight_distance = waypoint_distances[waypoints.Count - 1] - offsets[waypoints.Count - 1];
-        straight_distances.Add(straight_distance);
+        straight_distances.Add(waypoint_distances[waypoint_distances.Count - 1] - offsets[offsets.Count - 1]);
 
-        return Tuple.Create(turn_angles, straight_distances, satellite_turns);
+        BBPathInstructions path_instructions = new BBPathInstructions(turn_angles, straight_distances, satellite_turns);
+
+        return path_instructions;
 
     }
+
+    public static void PrintBBPathInstructions(BBPathInstructions pathInstructions)
+    {
+        for (int i = 0; i < pathInstructions.Angles.Count; i++)
+        {
+            if (pathInstructions.SatelliteTurns[i])
+            {
+                print("Turn angle: " + (-Mathf.Sign(pathInstructions.Angles[i]) * pi / 3));
+                print("Turn angle: " + pathInstructions.Angles[i]);
+                print("Turn angle: " + (Mathf.Sign(pathInstructions.Angles[i]) * pi / 3));
+            }
+            else
+            {
+                print("Turn angle: " + pathInstructions.Angles[i]);
+            }
+            print("Straight Distance: " + pathInstructions.Distances[i]);
+        }
+    }
+
+    public static List<Vector3> BBPathPoints(List<TurningCircleInfo> pathInfo)
+    {
+        List<Vector3> pathPoints = new List<Vector3>();
+
+        for (int i = 0; i < pathInfo.Count; i++)
+        {
+            Vector3 pathPoint1 = V2toV3(pathInfo[i].XP1);
+
+            pathPoints.Add(pathPoint1);
+
+            if (i != 0)
+            {
+                Vector3 pathPoint2 = V2toV3(pathInfo[i].XP2);
+
+                pathPoints.Add(pathPoint2);
+            }
+        }
+
+        return pathPoints;
+    }
+
+    public static Vector2 V3toV2(Vector3 point3D)
+    {
+        Vector2 point2D = new Vector2(
+            point3D.x,
+            point3D.z);
+
+        return point2D;
+    }
+
+    public static Vector3 V2toV3(Vector2 point2D)
+    {
+        Vector3 point3D = new Vector3(
+            point2D.x,
+            0f,
+            point2D.y);
+
+        return point3D;
+    }
 }
+
