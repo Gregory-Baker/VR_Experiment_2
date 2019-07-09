@@ -33,7 +33,8 @@ namespace Valve.VR.InteractionSystem
         public float robotRad;
         //public float targetInFrontAngle = 35f;
         //public float targetBehindAngle = 100f;
-        public float angularSpeed = 12f;
+        public float linearSpeed = 0.5f;
+        float angularSpeed;
         //public float veryCloseToTargetRad = 4f;
         //public float targetCloseFrontAngle = 20f;
 
@@ -106,29 +107,26 @@ namespace Valve.VR.InteractionSystem
                 return;
             }
 
+            angularSpeed = (180 * linearSpeed) / (Mathf.PI * robotTurnRadius);
+
             confirmTargetAction.AddOnChangeListener(OnConfirmActionChange, hand.handType);
 
             communicationDelay = robot.GetComponent<Status>().communicationDelay;
 
+            // Used in Hybrid a* path planning
             deltaXY[0].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
             deltaXY[0].y = robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
-
-
             deltaXY[1].x = chordLength;
-
             deltaXY[2].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
             deltaXY[2].y = -robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
 
-            Vector2 testTarget = new Vector2(-12.5f, 5.0f);
 
-            //var pathInfo = BakerPath(testTarget);
-
-
+            // BBPath Planning Test 
             Vector2 x1 = PathPlan.V3toV2(robot.transform.position);
-            float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi/2;
-            Vector2 x2 = new Vector2(-12.5f, 8);
+            float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi / 2;
+            Vector2 x2 = new Vector2(-12.5f, 9);
             Vector2 x3 = new Vector2(-8, 5.5f);
-            Vector2 x4 = new Vector2(-2.5f, 8);
+            Vector2 x4 = new Vector2(-12.5f, 7f);
 
             List<Vector2> waypoints = new List<Vector2>();
             //waypoints.Add(x1);
@@ -141,11 +139,14 @@ namespace Valve.VR.InteractionSystem
             var pathInstructions = PathPlan.BBInstructions(pathInfo);
             PathPlan.PrintBBPathInstructions(pathInstructions);
 
-            var pathPoints = PathPlan.BBPathPoints(pathInfo, 0.1f);
-            pathPoints.Insert(0, PathPlan.V2toV3(x1));
+            var pathPoints = PathPlan.BBPathPoints(pathInfo, robotTurnRadius, 0.1f);
+            //pathPoints.Insert(0, PathPlan.V2toV3(x1));
             pathPoints.Add(PathPlan.V2toV3(x4));
 
             OnDrawGizmosSelected(line, pathPoints);
+
+            StartCoroutine(MoveAlongBBPathCoroutine(0f, pathInstructions));
+
 
         }
 
@@ -336,6 +337,86 @@ namespace Valve.VR.InteractionSystem
                 yield return null;
             }
             MoveTarget(confirmedTarget, targetPosition);
+        }
+
+        IEnumerator MoveAlongBBPathCoroutine(float delayTime, PathPlan.BBPathInstructions instructions)
+        {
+            yield return new WaitForSeconds(delayTime);
+
+            for (int i = 0; i < instructions.Angles.Count; i++)
+            {
+                float distanceToTravel;
+                float distanceMoved = 0;
+                if (!instructions.SatelliteTurns[i])
+                {
+                    distanceToTravel = instructions.Angles[i] * robotTurnRadius;
+
+                    while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
+                    {
+                        distanceMoved += MoveRobotOneStep(robot, linearSpeed, -Mathf.Sign(instructions.Angles[i]) * angularSpeed);
+                        yield return null;
+                    }
+                }
+                else
+                {
+                    distanceToTravel = Mathf.Sign(instructions.Angles[i]) * robotTurnRadius * pi / 3;
+                    
+                    while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
+                    {
+                        distanceMoved += MoveRobotOneStep(robot, linearSpeed, Mathf.Sign(instructions.Angles[i]) * angularSpeed);
+                        yield return null;
+                    }
+
+                    distanceToTravel = instructions.Angles[i] * robotTurnRadius;
+                    distanceMoved = 0;
+
+                    while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
+                    {
+                        distanceMoved += MoveRobotOneStep(robot, linearSpeed, -Mathf.Sign(instructions.Angles[i]) * angularSpeed);
+                        yield return null;
+                    }
+
+                    distanceToTravel = Mathf.Sign(instructions.Angles[i]) * robotTurnRadius * pi / 3;
+                    distanceMoved = 0;
+
+                    while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
+                    {
+                        distanceMoved += MoveRobotOneStep(robot, linearSpeed, Mathf.Sign(instructions.Angles[i]) * angularSpeed);
+                        yield return null;
+                    }
+                }
+
+                distanceToTravel = instructions.Distances[i];
+
+                //StartCoroutine(MoveAlongBBPathSegment(robot, linearSpeed, 0f, distanceToTravel));
+
+                distanceMoved = 0;
+                while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
+                {
+                    distanceMoved += MoveRobotOneStep(robot, linearSpeed, 0f);
+                    yield return null;
+                }
+            }
+        }
+
+        IEnumerator MoveAlongBBPathSegment(GameObject robot, float linearVelocity, float angularVelocity, float distanceToTravel)
+        {
+            float distanceMoved = 0;
+            while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
+            {
+                distanceMoved += MoveRobotOneStep(robot, linearVelocity, angularVelocity);
+                yield return null;
+            }
+        }
+
+        public static float MoveRobotOneStep(GameObject robot, float linearVelocity, float angularVelocity)
+        {
+            float distanceMoved = linearVelocity * Time.deltaTime;
+
+            robot.transform.Translate(Vector3.forward * distanceMoved);
+            robot.transform.Rotate(Vector3.up * angularVelocity * Time.deltaTime);
+
+            return distanceMoved;
         }
 
         public static IEnumerable<double> Arange(double start, int count)

@@ -3524,7 +3524,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 388068879}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -20, y: 0, z: 7.5}
+  m_LocalPosition: {x: -20, y: 0.1, z: 7.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 109276162}
@@ -3552,7 +3552,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 388068879}
-  m_Enabled: 1
+  m_Enabled: 0
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 0.6
@@ -4721,11 +4721,11 @@ MonoBehaviour:
   navmesh: {fileID: 1252912692}
   line: {fileID: 470128478}
   stopAndTurnOn: 0
-  robotRad: 0
-  angularSpeed: 12
+  robotRad: 1
+  linearSpeed: 0.5
   waypoints: []
   waypointAccuracyRad: 0.4
-  robotTurnRadius: 1
+  robotTurnRadius: 1.3
   chordLength: 0.4
 --- !u!114 &470128475 stripped
 MonoBehaviour:
@@ -12608,7 +12608,7 @@ Rigidbody:
   m_Mass: 20
   m_Drag: 0
   m_AngularDrag: 0.05
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0

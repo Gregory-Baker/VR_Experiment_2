@@ -49,23 +49,30 @@ public class PathPlan : MonoBehaviour
         public Vector2 XP1 { get; set; }
         public Vector2 XP2 { get; set; }
         public bool ST { get; set; }
+        public Vector2 XC1 { get; set; }
+        public Vector2 XC2 { get; set; }
 
         public TurningCircleInfo(float alpha,
             float offset,
             float waypoint_distance,
-            Vector2 turning_circle_centre,
+            Vector2 turning_centre,
             Vector2 turn_start_pos,
             Vector2 turn_finish_pos,
-            bool satellite_turn)
+            bool satellite_turn,
+            Vector2 st_turn_centre_1,
+            Vector2 st_turn_centre_2
+            )
 
         {
             A = alpha;
             O = offset;
             D = waypoint_distance;
-            XC = turning_circle_centre;
+            XC = turning_centre;
             XP1 = turn_start_pos;
             XP2 = turn_finish_pos;
             ST = satellite_turn;
+            XC1 = st_turn_centre_1;
+            XC2 = st_turn_centre_2;
         }
     }
 
@@ -106,13 +113,16 @@ public class PathPlan : MonoBehaviour
         bool satellite_turn;
         float offset;
 
+        var xc1 = Vector2.zero;
+        var xc2 = Vector2.zero;
+
         if (d23 < delta_x_abs || d12 < delta_x_abs || (r_max > 0 && d2c > (r_max + r_t)))
         {
             satellite_turn = true;
             offset = Mathf.Sqrt(3) * r_t;
 
             xc = new Vector2(x2.x, x2.y);
-            alpha = turn_lr * (Mathf.Abs(alpha) + pi / 3);
+            alpha = turn_lr * (Mathf.Abs(alpha) + 2 * pi / 3);
         }
         else
         {
@@ -126,7 +136,7 @@ public class PathPlan : MonoBehaviour
         var xp2 = x2 + (offset / d23) * x23;
 
 
-        TurningCircleInfo turningCircleInfo = new TurningCircleInfo(alpha, offset, d23, xc, xp1, xp2, satellite_turn);
+        TurningCircleInfo turningCircleInfo = new TurningCircleInfo(alpha, offset, d23, xc, xp1, xp2, satellite_turn, xc1, xc2);
         return turningCircleInfo;
     }
 
@@ -155,6 +165,7 @@ public class PathPlan : MonoBehaviour
         }
 
         var alpha = (gamma + turn_lr * (pi / 2 - beta));
+        alpha = alpha % (2 * pi);
 
         var xc = Rotate(xc_1, -heading) + x1;
 
@@ -162,7 +173,7 @@ public class PathPlan : MonoBehaviour
 
         var xp = Rotate(xp_1, -heading) + x1;
 
-        TurningCircleInfo turningCircleInfo = new TurningCircleInfo(alpha, 0f, dpg, xc, xp, Vector2.zero, false);
+        TurningCircleInfo turningCircleInfo = new TurningCircleInfo(alpha, 0f, dpg, xc, x1, xp, false, Vector2.zero, Vector2.zero);
         return turningCircleInfo;
     }
 
@@ -243,25 +254,62 @@ public class PathPlan : MonoBehaviour
         }
     }
 
-    public static List<Vector3> BBPathPoints(List<TurningCircleInfo> pathInfo, float height = 0)
+    public static List<Vector3> BBPathPoints(List<TurningCircleInfo> pathInfo, float r_t, float height = 0)
     {
         List<Vector3> pathPoints = new List<Vector3>();
+
+        float headingStart = 0;
+        float headingEnd = 0;
 
         for (int i = 0; i < pathInfo.Count; i++)
         {
             Vector3 pathPoint1 = V2toV3(pathInfo[i].XP1, height);
-
             pathPoints.Add(pathPoint1);
 
-            if (i != 0)
+            headingEnd += pathInfo[i].A;
+            List<Vector3> arcPoints;
+            if (pathInfo[i].ST)
             {
-                Vector3 pathPoint2 = V2toV3(pathInfo[i].XP2, height);
-
-                pathPoints.Add(pathPoint2);
+                float headingStart2 = headingStart - Mathf.Sign(pathInfo[i].A) * pi / 3;
+                float headingEnd2 = headingEnd - Mathf.Sign(pathInfo[i].A) * pi / 3;
+                arcPoints = findPointsOnArc(pathInfo[i].XC, headingStart2, headingEnd2, r_t, height);
             }
+            else
+            {
+                arcPoints = findPointsOnArc(pathInfo[i].XC, headingStart, headingEnd, r_t, height);
+            }
+            headingStart = headingEnd;
+
+            pathPoints.AddRange(arcPoints);
+
+            Vector3 pathPoint2 = V2toV3(pathInfo[i].XP2, height);
+            pathPoints.Add(pathPoint2);
         }
 
         return pathPoints;
+    }
+
+    public static List<Vector3> findPointsOnArc(Vector2 circleCentre, float headingStart, float headingEnd, float r_t, float height = 0, int num = 20)
+    {
+        List<Vector3> arcPoints = new List<Vector3>();
+
+        float turnDirection = Mathf.Sign(headingEnd - headingStart);
+
+        float alpha = headingStart;
+
+            for (int j = 1; j < num; j++)
+            {
+                alpha = headingStart + j * (headingEnd - headingStart) / (num);
+
+                Vector3 turningCirclePoint = new Vector3(
+                    circleCentre.x + turnDirection * r_t * Mathf.Sin(alpha),
+                    height,
+                    circleCentre.y - turnDirection * r_t * Mathf.Cos(alpha));
+
+                arcPoints.Add(turningCirclePoint);
+            }
+
+        return arcPoints;
     }
 
     public static Vector2 V3toV2(Vector3 point3D)

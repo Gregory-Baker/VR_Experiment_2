@@ -17,8 +17,8 @@ public class SampleAgentScript : MonoBehaviour
 
     void Update()
     {
-        agent.SetDestination(target.position);
-        OnDrawGizmosSelected();
+        //agent.SetDestination(target.position);
+        //OnDrawGizmosSelected();
     }
 
     void OnDrawGizmosSelected()
