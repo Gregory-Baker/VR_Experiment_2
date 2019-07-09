@@ -243,19 +243,19 @@ public class PathPlan : MonoBehaviour
         }
     }
 
-    public static List<Vector3> BBPathPoints(List<TurningCircleInfo> pathInfo)
+    public static List<Vector3> BBPathPoints(List<TurningCircleInfo> pathInfo, float height = 0)
     {
         List<Vector3> pathPoints = new List<Vector3>();
 
         for (int i = 0; i < pathInfo.Count; i++)
         {
-            Vector3 pathPoint1 = V2toV3(pathInfo[i].XP1);
+            Vector3 pathPoint1 = V2toV3(pathInfo[i].XP1, height);
 
             pathPoints.Add(pathPoint1);
 
             if (i != 0)
             {
-                Vector3 pathPoint2 = V2toV3(pathInfo[i].XP2);
+                Vector3 pathPoint2 = V2toV3(pathInfo[i].XP2, height);
 
                 pathPoints.Add(pathPoint2);
             }
@@ -273,11 +273,11 @@ public class PathPlan : MonoBehaviour
         return point2D;
     }
 
-    public static Vector3 V2toV3(Vector2 point2D)
+    public static Vector3 V2toV3(Vector2 point2D, float height = 0)
     {
         Vector3 point3D = new Vector3(
             point2D.x,
-            0f,
+            height,
             point2D.y);
 
         return point3D;

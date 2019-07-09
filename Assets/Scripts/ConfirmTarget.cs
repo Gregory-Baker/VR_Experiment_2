@@ -124,11 +124,11 @@ namespace Valve.VR.InteractionSystem
             //var pathInfo = BakerPath(testTarget);
 
 
-            Vector2 x1 = new Vector2(-1, -2);
-            float heading = 3 * pi / 4;
-            Vector2 x2 = new Vector2(2, 4);
-            Vector2 x3 = new Vector2(11, 1);
-            Vector2 x4 = new Vector2(15, 5);
+            Vector2 x1 = PathPlan.V3toV2(robot.transform.position);
+            float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi/2;
+            Vector2 x2 = new Vector2(-12.5f, 8);
+            Vector2 x3 = new Vector2(-8, 5.5f);
+            Vector2 x4 = new Vector2(-2.5f, 8);
 
             List<Vector2> waypoints = new List<Vector2>();
             //waypoints.Add(x1);
@@ -141,7 +141,7 @@ namespace Valve.VR.InteractionSystem
             var pathInstructions = PathPlan.BBInstructions(pathInfo);
             PathPlan.PrintBBPathInstructions(pathInstructions);
 
-            var pathPoints = PathPlan.BBPathPoints(pathInfo);
+            var pathPoints = PathPlan.BBPathPoints(pathInfo, 0.1f);
             pathPoints.Insert(0, PathPlan.V2toV3(x1));
             pathPoints.Add(PathPlan.V2toV3(x4));
 
@@ -169,150 +169,12 @@ namespace Valve.VR.InteractionSystem
                 if (waypoints.Count >= 1)
                 {
                     //float robotHeadingRad = Mathf.Deg2Rad * robot.transform.eulerAngles.y;
-                    PlanPath(robot.transform.position, robot.transform.eulerAngles.y, waypoints[waypoints.Count-1]);
+                    //PlanPath(robot.transform.position, robot.transform.eulerAngles.y, waypoints[waypoints.Count-1]);
                     //MoveToWaypoint(waypoints[0]);
                 }
             }
         }
 
-        public void PlanPath(Vector3 startPos, float startHead, Vector3 targetPos)
-        {
-            var pathParams = BBPath(startPos, startHead, targetPos);
-
-            if (!pathParams.Item3)
-            {
-                StartCoroutine(HybridAStarPath(startPos, startHead, targetPos));
-            }
-        }
-
-        private Tuple<float, float, bool> BBPath(Vector3 startPos, float startHead, Vector3 targetPos)
-        {
-            float turn_angle = 0;
-            float straight_distance = 0;
-            Vector2 x_p = Vector2.zero;
-            bool validPath = true;
-
-            float r_t = robotTurnRadius;
-
-            Vector2 x_r = new Vector2(startPos.x, startPos.z);
-            Vector2 target = new Vector2(targetPos.x, targetPos.z);
-
-            float theta = -Mathf.Deg2Rad * startHead + pi / 2;
-
-            float cos_theta = Mathf.Cos(theta);
-            float sin_theta = Mathf.Sin(theta);
-
-            Vector2 x_rg = target - x_r;
-            float d_rg = x_rg.magnitude;
-
-            Vector2 x_rg_r = new Vector2(
-                x_rg.x * cos_theta + x_rg.y * sin_theta,
-                x_rg.y * cos_theta + x_rg.x * sin_theta);
-
-            int turn = 0;
-
-            Vector2 x_c = new Vector2();
-
-            if (x_rg_r.y > 0)
-            {
-                print("Left hand turn");
-                turn = 1;
-
-                x_c.x = x_r.x - r_t * sin_theta;
-                x_c.y = x_r.y + r_t*cos_theta;
-            }
-            else if (x_rg_r.y < 0)
-            {
-                print("Right hand turn");
-                turn = -1;
-
-                x_c.x = x_r.x + r_t * sin_theta;
-                x_c.y = x_r.y - r_t * cos_theta;
-            }
-            else if (x_rg_r.x < 0)
-            {
-                print("It's behind you!");
-                turn = 1;
-
-                x_c.x = x_r.x - r_t * sin_theta;
-                x_c.y = x_r.y + r_t * cos_theta;
-            }
-            else
-            {
-                print("Dead ahead");
-                straight_distance = d_rg;
-                validPath = false;
-                var result = Tuple.Create(turn_angle, straight_distance, validPath);
-                return result;
-            }
-
-            Vector2 x_cg = target - x_c;
-
-            float d_cg = x_cg.magnitude;
-            
-            if (d_cg < r_t)
-            {
-                print("Target unreachable - inside turning circle");
-            }
-            else
-            {
-                float beta = Mathf.Acos(r_t / d_cg);
-                float gamma = Mathf.Atan2(x_cg.y, x_cg.x);
-                if (turn > 0)
-                {
-                    if (gamma < -pi/2)
-                    {
-                        gamma += 2 * pi;
-                    }
-                    turn_angle = gamma - beta - theta + pi / 2;
-                    x_p.x = x_c.x + r_t * Mathf.Sin(theta + turn_angle);
-                    x_p.y = x_c.y - r_t * Mathf.Cos(theta + turn_angle);
-                }
-                else
-                {
-                    if (gamma > pi / 2)
-                    {
-                        gamma -= 2 * pi;
-                    }
-                    turn_angle = beta + gamma - theta - pi / 2;
-                    x_p.x = x_c.x - r_t * Mathf.Sin(theta + turn_angle);
-                    x_p.y = x_c.y + r_t * Mathf.Cos(theta + turn_angle);
-                }
-                straight_distance = Mathf.Sqrt(Mathf.Pow(r_t, 2) + Mathf.Pow(d_cg, 2));
-                print("Turn: " + turn_angle + " radians");
-                print("Move forward: " + straight_distance + " metres");
-            }
-            int steps = (int)(straight_distance/chordLength + 1);
-            var xCoords = LinSpace(x_p.x, target.x, steps);
-            var yCoords = LinSpace(x_p.y, target.y, steps);
-            Vector3[] linearSamplePoints = new Vector3[steps];
-            int i = 0;
-            foreach (var xCoord in xCoords)
-            {
-                linearSamplePoints[i].x = (float)xCoord;
-                i++;
-            }
-            i = 0;
-            foreach (var yCoord in yCoords)
-            {
-                linearSamplePoints[i].z = (float)yCoord;
-                i++;
-            }
-            NavMeshHit hit;
-            foreach (var samplePoint in linearSamplePoints)
-            {
-                if (!NavMesh.SamplePosition(samplePoint, out hit, 0.1f, NavMesh.AllAreas))
-                {
-                    validPath = false;
-                }
-            }
-            print("Valid Path: " + validPath);
-            if (validPath)
-            {
-                OnDrawGizmosSelected(line, linearSamplePoints);
-            }
-            return Tuple.Create(turn_angle, straight_distance, validPath);
-        }
 
         private void MoveToWaypoint(Vector3 waypointPosition)
         {
