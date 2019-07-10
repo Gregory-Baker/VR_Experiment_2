@@ -123,6 +123,7 @@ public class PathPlan : MonoBehaviour
 
             xc = new Vector2(x2.x, x2.y);
             alpha = turn_lr * (Mathf.Abs(alpha) + 2 * pi / 3);
+
         }
         else
         {
@@ -134,6 +135,23 @@ public class PathPlan : MonoBehaviour
         var xp1 = Rotate(xp1_1, -theta) + x1;
 
         var xp2 = x2 + (offset / d23) * x23;
+
+        if (satellite_turn)
+        {
+            var x12_3d = new Vector3(x12.x, x12.y, 0f) / d12;
+            var xp1_3d = new Vector3(xp1.x, xp1.y, 0f);
+            var xc1_3d = xp1_3d + r_t * Vector3.Cross(x12_3d, Mathf.Sign(x3_1.y)*Vector3.forward);
+            xc1 = new Vector2(xc1_3d.x, xc1_3d.y);
+
+            var x23_3d = new Vector3(x23.x, x23.y, 0f) / d23;
+            var xp2_3d = new Vector3(xp2.x, xp2.y, 0f);
+            var xc2_3d = xp2_3d + r_t * Vector3.Cross(x23_3d, Mathf.Sign(x3_1.y) * Vector3.forward);
+            xc2 = new Vector2(xc2_3d.x, xc2_3d.y);
+
+            //var x23_3d = V2toV3(x23)/d23;
+            //var xc2_3d = V2toV3(xp2) + r_t * Vector3.Cross(x23_3d, Vector3.down);
+            //xc2 = V3toV2(xc2_3d);
+        }
 
 
         TurningCircleInfo turningCircleInfo = new TurningCircleInfo(alpha, offset, d23, xc, xp1, xp2, satellite_turn, xc1, xc2);
@@ -242,7 +260,7 @@ public class PathPlan : MonoBehaviour
         {
             if (pathInstructions.SatelliteTurns[i])
             {
-                print("Turn angle: " + (-Mathf.Sign(pathInstructions.Angles[i]) * pi / 3));
+                print("Turn angle: " + (Mathf.Sign(pathInstructions.Angles[i]) * pi / 3));
                 print("Turn angle: " + pathInstructions.Angles[i]);
                 print("Turn angle: " + (Mathf.Sign(pathInstructions.Angles[i]) * pi / 3));
             }
@@ -272,7 +290,17 @@ public class PathPlan : MonoBehaviour
             {
                 float headingStart2 = headingStart - Mathf.Sign(pathInfo[i].A) * pi / 3;
                 float headingEnd2 = headingEnd - Mathf.Sign(pathInfo[i].A) * pi / 3;
-                arcPoints = findPointsOnArc(pathInfo[i].XC, headingStart2, headingEnd2, r_t, height);
+                headingEnd -= 2 * pi / 3;
+
+                arcPoints = findPointsOnArc(pathInfo[i].XC1, headingStart, headingStart2, r_t, height);
+                arcPoints.AddRange(findPointsOnArc(pathInfo[i].XC, headingStart2, headingEnd2, r_t, height));
+                arcPoints.AddRange(findPointsOnArc(pathInfo[i].XC2, headingEnd2, headingEnd, r_t, height));
+
+                print(headingStart);
+                print(headingStart2);
+
+                print(headingEnd2);
+                print(headingEnd);
             }
             else
             {

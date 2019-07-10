@@ -126,7 +126,8 @@ namespace Valve.VR.InteractionSystem
             float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi / 2;
             Vector2 x2 = new Vector2(-12.5f, 9);
             Vector2 x3 = new Vector2(-8, 5.5f);
-            Vector2 x4 = new Vector2(-12.5f, 7f);
+            //Vector2 x4 = new Vector2(-12.5f, 7f);
+            Vector2 x4 = new Vector2(-12, 9.5f);
 
             List<Vector2> waypoints = new List<Vector2>();
             //waypoints.Add(x1);
@@ -347,35 +348,28 @@ namespace Valve.VR.InteractionSystem
             {
                 float distanceToTravel;
                 float distanceMoved = 0;
-                if (!instructions.SatelliteTurns[i])
-                {
-                    distanceToTravel = instructions.Angles[i] * robotTurnRadius;
-
-                    while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
-                    {
-                        distanceMoved += MoveRobotOneStep(robot, linearSpeed, -Mathf.Sign(instructions.Angles[i]) * angularSpeed);
-                        yield return null;
-                    }
-                }
-                else
+                if (instructions.SatelliteTurns[i])
                 {
                     distanceToTravel = Mathf.Sign(instructions.Angles[i]) * robotTurnRadius * pi / 3;
-                    
+
                     while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
                     {
                         distanceMoved += MoveRobotOneStep(robot, linearSpeed, Mathf.Sign(instructions.Angles[i]) * angularSpeed);
                         yield return null;
                     }
+                }
 
-                    distanceToTravel = instructions.Angles[i] * robotTurnRadius;
-                    distanceMoved = 0;
+                distanceToTravel = instructions.Angles[i] * robotTurnRadius;
+                distanceMoved = 0;
 
-                    while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
-                    {
-                        distanceMoved += MoveRobotOneStep(robot, linearSpeed, -Mathf.Sign(instructions.Angles[i]) * angularSpeed);
-                        yield return null;
-                    }
+                while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
+                {
+                    distanceMoved += MoveRobotOneStep(robot, linearSpeed, -Mathf.Sign(instructions.Angles[i]) * angularSpeed);
+                    yield return null;
+                }
 
+                if (instructions.SatelliteTurns[i])
+                {
                     distanceToTravel = Mathf.Sign(instructions.Angles[i]) * robotTurnRadius * pi / 3;
                     distanceMoved = 0;
 
@@ -387,8 +381,6 @@ namespace Valve.VR.InteractionSystem
                 }
 
                 distanceToTravel = instructions.Distances[i];
-
-                //StartCoroutine(MoveAlongBBPathSegment(robot, linearSpeed, 0f, distanceToTravel));
 
                 distanceMoved = 0;
                 while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
