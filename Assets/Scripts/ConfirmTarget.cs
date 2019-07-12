@@ -119,14 +119,14 @@ namespace Valve.VR.InteractionSystem
             communicationDelay = robot.GetComponent<Status>().communicationDelay;
 
             // Used in Hybrid a* path planning
-            deltaXY[0].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
-            deltaXY[0].y = robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
-            deltaXY[1].x = chordLength;
-            deltaXY[2].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
-            deltaXY[2].y = -robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
+            //deltaXY[0].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
+            //deltaXY[0].y = robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
+            //deltaXY[1].x = chordLength;
+            //deltaXY[2].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
+            //deltaXY[2].y = -robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
 
 
-            //// BBPath Planning Test 
+            ////// BBPath Planning Test 
             //Vector2 x1 = PathPlan.V3toV2(robot.transform.position);
             //float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi / 2;
             //Vector2 x2 = new Vector2(-12.5f, 8);
@@ -147,8 +147,9 @@ namespace Valve.VR.InteractionSystem
             //if (PathPlan.CheckPathPoints(pathPoints))
             //{
             //    var pathInstructions = PathPlan.BBInstructions(pathInfo);
+            //    var unpackedInstructions = PathPlan.UnpackPathInstructions(pathInstructions);
             //    OnDrawGizmosSelected(line, pathPoints);
-            //    StartCoroutine(MoveAlongBBPathCoroutine(0f, pathInstructions));
+            //    StartCoroutine(MoveAlongBBPath(unpackedInstructions));
             //}
 
 
@@ -185,19 +186,14 @@ namespace Valve.VR.InteractionSystem
                     if (PathPlan.CheckPathPoints(pathPoints))
                     {
                         var pathInstructions = PathPlan.BBInstructions(pathInfo);
+                        var unpackedInstructions = PathPlan.UnpackPathInstructions(pathInstructions);
                         OnDrawGizmosSelected(line, pathPoints);
                         newPath = true;
-                        StopAllCoroutines();
                         //StartCoroutine(MoveAlongBBPath(0f, pathInstructions));
-                        MoveAlongBBPath(0f, pathInstructions);
+                        StartCoroutine(MoveAlongBBPath(unpackedInstructions));
                         //StartCoroutine(MoveAlongBBPathCoroutine(0f, pathInstructions));
                     }
 
-
-
-                    //float robotHeadingRad = Mathf.Deg2Rad * robot.transform.eulerAngles.y;
-                    //PlanPath(robot.transform.position, robot.transform.eulerAngles.y, waypoints[waypoints.Count-1]);
-                    //MoveToWaypoint(waypoints[0]);
                 }
             }
         }
@@ -433,9 +429,42 @@ namespace Valve.VR.InteractionSystem
             while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel) && !newPath)
             {
                 distanceMoved += MoveRobotOneStep(robot, linearVelocity, angularVelocity);
-                if (newPath)
-                    break;
                 yield return null;
+            }
+        }
+
+        IEnumerator MoveAlongBBPath(List<Vector2> instructions, float delayTime = 0)
+        {
+            yield return 0;
+            newPath = false;
+            float waypointCheck = 1;
+            foreach (Vector2 instruction in instructions)
+            {
+                float distanceToTravel;
+                float angularVelocity = 0;
+                if (instruction.x == 1)
+                {
+                    distanceToTravel = instruction.y * robotTurnRadius;
+                    angularVelocity = Mathf.Sign(instruction.y) * angularSpeed;
+                }
+                else
+                {
+                    distanceToTravel = instruction.y;
+                }
+
+                float distanceMoved = 0;
+                while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel) && !newPath)
+                {
+                    distanceMoved += MoveRobotOneStep(robot, linearSpeed, angularVelocity);
+                    yield return null;
+                }
+
+                if (instruction.x - waypointCheck > 0.1)
+                {
+                    waypoints.RemoveAt(0);
+                }
+                waypointCheck = instruction.x;
+                if (newPath) { break; }
             }
         }
 

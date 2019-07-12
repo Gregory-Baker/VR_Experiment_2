@@ -264,14 +264,14 @@ public class PathPlan : MonoBehaviour
             if (pathInstructions.SatelliteTurns[i])
             {
                 instructions.Add(new Vector2(1, Mathf.Sign(pathInstructions.Angles[i]) * pi / 3));
-                instructions.Add(new Vector2(1, pathInstructions.Angles[i]));
+                instructions.Add(new Vector2(1, -pathInstructions.Angles[i]));
                 instructions.Add(new Vector2(1, Mathf.Sign(pathInstructions.Angles[i]) * pi / 3));
             }
             else
             {
-                if (pathInstructions.Angles[i] > 0.00001)
+                if (Mathf.Abs(pathInstructions.Angles[i]) > 0.00001)
                 {
-                    instructions.Add(new Vector2(1, pathInstructions.Angles[i]));
+                    instructions.Add(new Vector2(1, -pathInstructions.Angles[i]));
                 }
             }
             instructions.Add(new Vector2(0, pathInstructions.Distances[i]));
