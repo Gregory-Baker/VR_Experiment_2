@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Linq;
 
 public class PathPlan : MonoBehaviour
 {
@@ -254,6 +255,31 @@ public class PathPlan : MonoBehaviour
 
     }
 
+    public static List<Vector2> UnpackPathInstructions(BBPathInstructions pathInstructions)
+    {
+        List<Vector2> instructions = new List<Vector2>();
+
+        for (int i = 0; i < pathInstructions.Angles.Count; i++)
+        {
+            if (pathInstructions.SatelliteTurns[i])
+            {
+                instructions.Add(new Vector2(1, Mathf.Sign(pathInstructions.Angles[i]) * pi / 3));
+                instructions.Add(new Vector2(1, pathInstructions.Angles[i]));
+                instructions.Add(new Vector2(1, Mathf.Sign(pathInstructions.Angles[i]) * pi / 3));
+            }
+            else
+            {
+                if (pathInstructions.Angles[i] > 0.00001)
+                {
+                    instructions.Add(new Vector2(1, pathInstructions.Angles[i]));
+                }
+            }
+            instructions.Add(new Vector2(0, pathInstructions.Distances[i]));
+        }
+
+        return instructions;
+    }
+
     public static void PrintBBPathInstructions(BBPathInstructions pathInstructions)
     {
         for (int i = 0; i < pathInstructions.Angles.Count; i++)
@@ -272,7 +298,7 @@ public class PathPlan : MonoBehaviour
         }
     }
 
-    public static List<Vector3> BBPathPoints(List<TurningCircleInfo> pathInfo, float r_t, float height = 0)
+    public static List<Vector3> BBPathPoints(List<TurningCircleInfo> pathInfo, Vector2 finalPoint, float r_t,  float height = 0)
     {
         List<Vector3> pathPoints = new List<Vector3>();
 
@@ -292,19 +318,13 @@ public class PathPlan : MonoBehaviour
                 float headingEnd2 = headingEnd - Mathf.Sign(pathInfo[i].A) * pi / 3;
                 headingEnd -= 2 * pi / 3;
 
-                arcPoints = findPointsOnArc(pathInfo[i].XC1, headingStart, headingStart2, r_t, height);
-                arcPoints.AddRange(findPointsOnArc(pathInfo[i].XC, headingStart2, headingEnd2, r_t, height));
-                arcPoints.AddRange(findPointsOnArc(pathInfo[i].XC2, headingEnd2, headingEnd, r_t, height));
-
-                print(headingStart);
-                print(headingStart2);
-
-                print(headingEnd2);
-                print(headingEnd);
+                arcPoints = FindPointsOnArc(pathInfo[i].XC1, headingStart, headingStart2, r_t, height);
+                arcPoints.AddRange(FindPointsOnArc(pathInfo[i].XC, headingStart2, headingEnd2, r_t, height));
+                arcPoints.AddRange(FindPointsOnArc(pathInfo[i].XC2, headingEnd2, headingEnd, r_t, height));
             }
             else
             {
-                arcPoints = findPointsOnArc(pathInfo[i].XC, headingStart, headingEnd, r_t, height);
+                arcPoints = FindPointsOnArc(pathInfo[i].XC, headingStart, headingEnd, r_t, height);
             }
             headingStart = headingEnd;
 
@@ -312,12 +332,23 @@ public class PathPlan : MonoBehaviour
 
             Vector3 pathPoint2 = V2toV3(pathInfo[i].XP2, height);
             pathPoints.Add(pathPoint2);
+
+            List<Vector3> straightPoints;
+            if (i != pathInfo.Count - 1)
+            {
+                straightPoints = LinSpaceV2(pathInfo[i].XP2, pathInfo[i + 1].XP1);
+            }
+            else
+            {
+                straightPoints = LinSpaceV2(pathInfo[i].XP2, finalPoint);
+            }
+            pathPoints.AddRange(straightPoints);
         }
 
         return pathPoints;
     }
 
-    public static List<Vector3> findPointsOnArc(Vector2 circleCentre, float headingStart, float headingEnd, float r_t, float height = 0, int num = 20)
+    public static List<Vector3> FindPointsOnArc(Vector2 circleCentre, float headingStart, float headingEnd, float r_t, float height = 0, int num = 20)
     {
         List<Vector3> arcPoints = new List<Vector3>();
 
@@ -340,6 +371,22 @@ public class PathPlan : MonoBehaviour
         return arcPoints;
     }
 
+    public static bool CheckPathPoints(List<Vector3> linearSamplePoints)
+    {
+        bool validPath = true;
+        NavMeshHit hit;
+        foreach (var samplePoint in linearSamplePoints)
+        {
+            if (!NavMesh.SamplePosition(samplePoint, out hit, 0.1f, NavMesh.AllAreas))
+            {
+                validPath = false;
+                return validPath;
+            }
+        }
+
+        return validPath;
+    }
+
     public static Vector2 V3toV2(Vector3 point3D)
     {
         Vector2 point2D = new Vector2(
@@ -357,6 +404,56 @@ public class PathPlan : MonoBehaviour
             point2D.y);
 
         return point3D;
+    }
+
+    public static IEnumerable<double> Arange(double start, int count)
+    {
+        return Enumerable.Range((int)start, count).Select(v => (double)v);
+    }
+
+    public static IEnumerable<double> LinSpace(double start, double stop, int num, bool endpoint = true)
+    {
+        var result = new List<double>();
+        if (num <= 0)
+        {
+            return result;
+        }
+
+        if (endpoint)
+        {
+            if (num == 1)
+            {
+                return new List<double>() { start };
+            }
+
+            var step = (stop - start) / ((double)num - 1.0d);
+            result = Arange(0, num).Select(v => (v * step) + start).ToList();
+        }
+        else
+        {
+            var step = (stop - start) / (double)num;
+            result = Arange(0, num).Select(v => (v * step) + start).ToList();
+        }
+
+        return result;
+    }
+
+    public static List<Vector3> LinSpaceV2(Vector2 start, Vector2 end, float chordLength = 0.1f, float height = 0.1f)
+    {
+        int steps = (int)(start.magnitude / chordLength + 1);
+        var xCoords = LinSpace(start.x, end.x, steps, false);
+        var yCoords = LinSpace(start.y, end.y, steps, false);
+        var xCoordsL = xCoords.ToList();
+        var yCoordsL = yCoords.ToList();
+
+        List<Vector3> linearSamplePoints = new List<Vector3>();
+
+        for (int i = 0; i < xCoordsL.Count; i++)
+        {
+            linearSamplePoints.Add(new Vector3((float)xCoordsL[i], height, (float)yCoordsL[i]));
+        }
+
+        return linearSamplePoints;
     }
 }
 

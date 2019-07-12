@@ -40,7 +40,7 @@ namespace Valve.VR.InteractionSystem
 
         Vector3 targetPosition;
 
-        public List<Vector3> waypoints = new List<Vector3>();
+        public List<Vector2> waypoints = new List<Vector2>();
         float distanceToNextWaypoint;
         public float waypointAccuracyRad = 1f;
         public float robotTurnRadius = 2f;
@@ -52,6 +52,11 @@ namespace Valve.VR.InteractionSystem
         float angleToTarget;
         float distanceToTarget;
         Vector2[] deltaXY = new Vector2[3];
+
+        bool newPath = false;
+        bool newSegment = false;
+
+        Coroutine lastRoutine = null;
 
         public class RSpoint
         {
@@ -121,32 +126,30 @@ namespace Valve.VR.InteractionSystem
             deltaXY[2].y = -robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
 
 
-            // BBPath Planning Test 
-            Vector2 x1 = PathPlan.V3toV2(robot.transform.position);
-            float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi / 2;
-            Vector2 x2 = new Vector2(-12.5f, 9);
-            Vector2 x3 = new Vector2(-8, 5.5f);
-            //Vector2 x4 = new Vector2(-12.5f, 7f);
-            Vector2 x4 = new Vector2(-12, 9.5f);
+            //// BBPath Planning Test 
+            //Vector2 x1 = PathPlan.V3toV2(robot.transform.position);
+            //float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi / 2;
+            //Vector2 x2 = new Vector2(-12.5f, 8);
+            //Vector2 x3 = new Vector2(-8, 5.5f);
+            ////Vector2 x4 = new Vector2(-12.5f, 7f);
+            //Vector2 x4 = new Vector2(-12, 9.5f);
 
-            List<Vector2> waypoints = new List<Vector2>();
-            //waypoints.Add(x1);
-            waypoints.Add(x2);
-            waypoints.Add(x3);
-            waypoints.Add(x4);
+            //List<Vector2> waypoints = new List<Vector2>();
+            ////waypoints.Add(x1);
+            //waypoints.Add(x2);
+            //waypoints.Add(x3);
+            //waypoints.Add(x4);
 
-            var pathInfo = PathPlan.BBInfo(x1, heading, waypoints, robotTurnRadius);
+            //var pathInfo = PathPlan.BBInfo(x1, heading, waypoints, robotTurnRadius);
 
-            var pathInstructions = PathPlan.BBInstructions(pathInfo);
-            PathPlan.PrintBBPathInstructions(pathInstructions);
+            //var pathPoints = PathPlan.BBPathPoints(pathInfo, waypoints.Last(), robotTurnRadius, 0.1f);
 
-            var pathPoints = PathPlan.BBPathPoints(pathInfo, robotTurnRadius, 0.1f);
-            //pathPoints.Insert(0, PathPlan.V2toV3(x1));
-            pathPoints.Add(PathPlan.V2toV3(x4));
-
-            OnDrawGizmosSelected(line, pathPoints);
-
-            StartCoroutine(MoveAlongBBPathCoroutine(0f, pathInstructions));
+            //if (PathPlan.CheckPathPoints(pathPoints))
+            //{
+            //    var pathInstructions = PathPlan.BBInstructions(pathInfo);
+            //    OnDrawGizmosSelected(line, pathPoints);
+            //    StartCoroutine(MoveAlongBBPathCoroutine(0f, pathInstructions));
+            //}
 
 
         }
@@ -161,15 +164,37 @@ namespace Valve.VR.InteractionSystem
         {
             if (newValue)
             {
-                MoveTarget(interimTarget, robot.transform.position);
+                //MoveTarget(interimTarget, robot.transform.position);
 
                 targetPosition = selectedTarget.transform.position;
                 targetPosition.y += verticalOffset;
 
-                waypoints.Add(targetPosition);
+                CreateWaypointDisk(targetPosition);
+
+                waypoints.Add(PathPlan.V3toV2(targetPosition));
 
                 if (waypoints.Count >= 1)
                 {
+                    Vector2 x1 = PathPlan.V3toV2(robot.transform.position);
+                    float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi / 2;
+
+                    var pathInfo = PathPlan.BBInfo(x1, heading, waypoints, robotTurnRadius);
+
+                    var pathPoints = PathPlan.BBPathPoints(pathInfo, waypoints.Last(), robotTurnRadius, 0.1f);
+
+                    if (PathPlan.CheckPathPoints(pathPoints))
+                    {
+                        var pathInstructions = PathPlan.BBInstructions(pathInfo);
+                        OnDrawGizmosSelected(line, pathPoints);
+                        newPath = true;
+                        StopAllCoroutines();
+                        //StartCoroutine(MoveAlongBBPath(0f, pathInstructions));
+                        MoveAlongBBPath(0f, pathInstructions);
+                        //StartCoroutine(MoveAlongBBPathCoroutine(0f, pathInstructions));
+                    }
+
+
+
                     //float robotHeadingRad = Mathf.Deg2Rad * robot.transform.eulerAngles.y;
                     //PlanPath(robot.transform.position, robot.transform.eulerAngles.y, waypoints[waypoints.Count-1]);
                     //MoveToWaypoint(waypoints[0]);
@@ -177,6 +202,14 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
+        private void CreateWaypointDisk(Vector3 targetPosition)
+        {
+            GameObject disk = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            disk.transform.localScale = new Vector3(0.3f, 0.01f, 0.3f);
+            disk.transform.position = targetPosition;
+            disk.GetComponent<Collider>().enabled = false;
+            disk.GetComponent<Renderer>().material.color = Color.green;
+        }
 
         private void MoveToWaypoint(Vector3 waypointPosition)
         {
@@ -279,10 +312,12 @@ namespace Valve.VR.InteractionSystem
                 newPoint.N = nodeCounter;
                 newPoint.X += Vector3.forward * (delta.x * Mathf.Cos(Node.Theta) + delta.y * Mathf.Sin(Node.Theta));
                 newPoint.X += Vector3.right * (delta.x * Mathf.Sin(Node.Theta) - delta.y * Mathf.Cos(Node.Theta));
+
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 cube.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
                 cube.transform.position = newPoint.X;
                 cube.GetComponent<Collider>().enabled = false;
+
                 if (delta.y > 0.001)
                 {
                     newPoint.Theta = Node.Theta - chordLength / robotTurnRadius;
@@ -347,6 +382,7 @@ namespace Valve.VR.InteractionSystem
             for (int i = 0; i < instructions.Angles.Count; i++)
             {
                 float distanceToTravel;
+
                 float distanceMoved = 0;
                 if (instructions.SatelliteTurns[i])
                 {
@@ -381,8 +417,8 @@ namespace Valve.VR.InteractionSystem
                 }
 
                 distanceToTravel = instructions.Distances[i];
-
                 distanceMoved = 0;
+
                 while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
                 {
                     distanceMoved += MoveRobotOneStep(robot, linearSpeed, 0f);
@@ -394,10 +430,43 @@ namespace Valve.VR.InteractionSystem
         IEnumerator MoveAlongBBPathSegment(GameObject robot, float linearVelocity, float angularVelocity, float distanceToTravel)
         {
             float distanceMoved = 0;
-            while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
+            while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel) && !newPath)
             {
                 distanceMoved += MoveRobotOneStep(robot, linearVelocity, angularVelocity);
+                if (newPath)
+                    break;
                 yield return null;
+            }
+        }
+
+        public void MoveAlongBBPath(float delayTime, PathPlan.BBPathInstructions instructions)
+        {
+            newPath = false;
+            for (int i = 0; i < instructions.Angles.Count; i++)
+            {
+                float distanceToTravel;
+                if (instructions.SatelliteTurns[i])
+                {
+                    distanceToTravel = Mathf.Sign(instructions.Angles[i]) * robotTurnRadius * pi / 3;
+                    StartCoroutine(MoveAlongBBPathSegment(robot, linearSpeed, Mathf.Sign(instructions.Angles[i]) * angularSpeed, distanceToTravel));
+                }
+                if (newPath) { print("here");  break; }
+
+                distanceToTravel = instructions.Angles[i] * robotTurnRadius;
+                StartCoroutine(MoveAlongBBPathSegment(robot, linearSpeed, -Mathf.Sign(instructions.Angles[i]) * angularSpeed, distanceToTravel));
+                if (newPath) { print("herea"); break; }
+
+                if (instructions.SatelliteTurns[i])
+                {
+                    distanceToTravel = Mathf.Sign(instructions.Angles[i]) * robotTurnRadius * pi / 3;
+                    StartCoroutine(MoveAlongBBPathSegment(robot, linearSpeed, Mathf.Sign(instructions.Angles[i]) * angularSpeed, distanceToTravel));
+                }
+                if (newPath) { print("here"); break; }
+
+                distanceToTravel = instructions.Distances[i];
+                StartCoroutine(MoveAlongBBPathSegment(robot, linearSpeed, 0f, distanceToTravel));
+
+                if (newPath) { print("heres"); break; }
             }
         }
 
