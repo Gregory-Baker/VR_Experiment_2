@@ -271,7 +271,7 @@ public class PathPlan : MonoBehaviour
             {
                 if (Mathf.Abs(pathInstructions.Angles[i]) > 0.00001)
                 {
-                    instructions.Add(new Vector2(1, -pathInstructions.Angles[i]));
+                instructions.Add(new Vector2(1, -pathInstructions.Angles[i]));
                 }
             }
             instructions.Add(new Vector2(0, pathInstructions.Distances[i]));
@@ -298,12 +298,12 @@ public class PathPlan : MonoBehaviour
         }
     }
 
-    public static List<Vector3> BBPathPoints(List<TurningCircleInfo> pathInfo, Vector2 finalPoint, float r_t,  float height = 0)
+    public static List<Vector3> BBPathPoints(float heading, List<TurningCircleInfo> pathInfo, Vector2 finalPoint, float r_t,  float height = 0)
     {
         List<Vector3> pathPoints = new List<Vector3>();
 
-        float headingStart = 0;
-        float headingEnd = 0;
+        float headingStart = heading;
+        float headingEnd = heading;
 
         for (int i = 0; i < pathInfo.Count; i++)
         {
@@ -438,7 +438,7 @@ public class PathPlan : MonoBehaviour
         return result;
     }
 
-    public static List<Vector3> LinSpaceV2(Vector2 start, Vector2 end, float chordLength = 0.1f, float height = 0.1f)
+    public static List<Vector3> LinSpaceV2(Vector2 start, Vector2 end, float chordLength = 0.5f, float height = 0.1f)
     {
         int steps = (int)(start.magnitude / chordLength + 1);
         var xCoords = LinSpace(start.x, end.x, steps, false);

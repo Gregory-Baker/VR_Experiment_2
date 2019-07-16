@@ -41,7 +41,7 @@ namespace Valve.VR.InteractionSystem
         Vector3 targetPosition;
 
         public List<Vector2> waypoints = new List<Vector2>();
-        float distanceToNextWaypoint;
+        //float distanceToNextWaypoint;
         public float waypointAccuracyRad = 1f;
         public float robotTurnRadius = 2f;
         public float chordLength = 0.4f;
@@ -55,6 +55,11 @@ namespace Valve.VR.InteractionSystem
 
         bool newPath = false;
         bool newSegment = false;
+
+        bool bbPathPlanning = false;
+        bool hybridPathPlanning = true;
+
+        public List<GameObject> cubes = new List<GameObject>();
 
         Coroutine lastRoutine = null;
 
@@ -119,30 +124,29 @@ namespace Valve.VR.InteractionSystem
             communicationDelay = robot.GetComponent<Status>().communicationDelay;
 
             // Used in Hybrid a* path planning
-            //deltaXY[0].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
-            //deltaXY[0].y = robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
-            //deltaXY[1].x = chordLength;
-            //deltaXY[2].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
-            //deltaXY[2].y = -robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
+            deltaXY[0].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
+            deltaXY[0].y = robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
+            deltaXY[1].x = chordLength;
+            deltaXY[2].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
+            deltaXY[2].y = -robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
 
 
-            ////// BBPath Planning Test 
+            /// BBPath Planning Test 
             //Vector2 x1 = PathPlan.V3toV2(robot.transform.position);
             //float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi / 2;
-            //Vector2 x2 = new Vector2(-12.5f, 8);
-            //Vector2 x3 = new Vector2(-8, 5.5f);
-            ////Vector2 x4 = new Vector2(-12.5f, 7f);
-            //Vector2 x4 = new Vector2(-12, 9.5f);
 
             //List<Vector2> waypoints = new List<Vector2>();
-            ////waypoints.Add(x1);
-            //waypoints.Add(x2);
-            //waypoints.Add(x3);
-            //waypoints.Add(x4);
+
+            //waypoints.Add(new Vector2(-13f, 8f));
+            //waypoints.Add(new Vector2(-5, 7f));
+            //waypoints.Add(new Vector2(-1.5f, 5.1f));
+            //waypoints.Add(new Vector2(0.5f, 2.5f));
+            //waypoints.Add(new Vector2(1.8f, -1.25f));
 
             //var pathInfo = PathPlan.BBInfo(x1, heading, waypoints, robotTurnRadius);
 
-            //var pathPoints = PathPlan.BBPathPoints(pathInfo, waypoints.Last(), robotTurnRadius, 0.1f);
+            //var pathPoints = PathPlan.BBPathPoints(heading, pathInfo, waypoints.Last(), robotTurnRadius, 0.1f);
+            //ShowPathPoints(pathPoints);
 
             //if (PathPlan.CheckPathPoints(pathPoints))
             //{
@@ -176,25 +180,56 @@ namespace Valve.VR.InteractionSystem
 
                 if (waypoints.Count >= 1)
                 {
-                    Vector2 x1 = PathPlan.V3toV2(robot.transform.position);
-                    float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi / 2;
-
-                    var pathInfo = PathPlan.BBInfo(x1, heading, waypoints, robotTurnRadius);
-
-                    var pathPoints = PathPlan.BBPathPoints(pathInfo, waypoints.Last(), robotTurnRadius, 0.1f);
-
-                    if (PathPlan.CheckPathPoints(pathPoints))
+                    if (bbPathPlanning)
                     {
-                        var pathInstructions = PathPlan.BBInstructions(pathInfo);
-                        var unpackedInstructions = PathPlan.UnpackPathInstructions(pathInstructions);
-                        OnDrawGizmosSelected(line, pathPoints);
-                        newPath = true;
-                        //StartCoroutine(MoveAlongBBPath(0f, pathInstructions));
-                        StartCoroutine(MoveAlongBBPath(unpackedInstructions));
-                        //StartCoroutine(MoveAlongBBPathCoroutine(0f, pathInstructions));
-                    }
+                        Vector2 x1 = PathPlan.V3toV2(robot.transform.position);
+                        float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi / 2;
 
+                        var pathInfo = PathPlan.BBInfo(x1, heading, waypoints, robotTurnRadius);
+
+                        var pathPoints = PathPlan.BBPathPoints(heading, pathInfo, waypoints.Last(), robotTurnRadius, 0.1f);
+                        DeletePathPoints();
+                        ShowPathPoints(pathPoints);
+
+                        if (PathPlan.CheckPathPoints(pathPoints))
+                        {
+                            var pathInstructions = PathPlan.BBInstructions(pathInfo);
+                            print("new instructions");
+                            PathPlan.PrintBBPathInstructions(pathInstructions);
+                            var unpackedInstructions = PathPlan.UnpackPathInstructions(pathInstructions);
+                            OnDrawGizmosSelected(line, pathPoints);
+                            newPath = true;
+                            StartCoroutine(MoveAlongBBPath(unpackedInstructions));
+                        }
+                        else { print("path not feasible"); }
+                    }
+                    else if (hybridPathPlanning)
+                    {
+                        float robotHeadingRad = Mathf.Deg2Rad * robot.transform.eulerAngles.y;
+                        print("Heading: " + robotHeadingRad);
+                        StartCoroutine(HybridAStarPath(robot.transform.position, robotHeadingRad, targetPosition));
+                    }
                 }
+            }
+        }
+
+        public void ShowPathPoints(List<Vector3> pathPoints)
+        {
+            foreach (Vector3 point in pathPoints)
+            {
+                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                cube.transform.position = point;
+                cube.GetComponent<Collider>().enabled = false;
+                cubes.Add(cube);
+            }
+        }
+
+        public void DeletePathPoints()
+        {
+            foreach (GameObject cube in cubes)
+            {
+                Destroy(cube);
             }
         }
 
@@ -248,17 +283,12 @@ namespace Valve.VR.InteractionSystem
         {
             if (waypoints.Count > 0)
             {
-                distanceToNextWaypoint = Vector3.Distance(waypoints[0], robot.transform.position);
+                Vector3 waypoint_3d = PathPlan.V2toV3(waypoints[0]);
+                float distanceToNextWaypoint = Vector3.Distance(waypoint_3d, robot.transform.position);
 
                 if (distanceToNextWaypoint < waypointAccuracyRad)
                 {
-                    if (waypoints.Count > 1)
-                    {
-                        MoveToWaypoint(waypoints[1]);
-                        waypoints.RemoveAt(0);
-                        float robotHeadingRad = Mathf.Deg2Rad * robot.transform.eulerAngles.y;
-                        HybridAStarPath(robot.transform.position, robotHeadingRad, waypoints[0]);
-                    }
+                    waypoints.RemoveAt(0);
                 }
             }
         }
@@ -270,6 +300,8 @@ namespace Valve.VR.InteractionSystem
             float robotHeadingRad = Mathf.Deg2Rad * robot.transform.eulerAngles.y;
 
             int nodeCounter = 0;
+
+            print("here");
 
             List<Vector2> plannedPath = new List<Vector2>();
 
@@ -296,6 +328,7 @@ namespace Valve.VR.InteractionSystem
                 }
                 yield return null;
             }
+            print("done");
             yield break;
         }
 
@@ -309,6 +342,7 @@ namespace Valve.VR.InteractionSystem
                 newPoint.X += Vector3.forward * (delta.x * Mathf.Cos(Node.Theta) + delta.y * Mathf.Sin(Node.Theta));
                 newPoint.X += Vector3.right * (delta.x * Mathf.Sin(Node.Theta) - delta.y * Mathf.Cos(Node.Theta));
 
+                print("make: " + newPoint.X);
                 GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 cube.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
                 cube.transform.position = newPoint.X;
@@ -437,7 +471,6 @@ namespace Valve.VR.InteractionSystem
         {
             yield return 0;
             newPath = false;
-            float waypointCheck = 1;
             foreach (Vector2 instruction in instructions)
             {
                 float distanceToTravel;
@@ -458,12 +491,6 @@ namespace Valve.VR.InteractionSystem
                     distanceMoved += MoveRobotOneStep(robot, linearSpeed, angularVelocity);
                     yield return null;
                 }
-
-                if (instruction.x - waypointCheck > 0.1)
-                {
-                    waypoints.RemoveAt(0);
-                }
-                waypointCheck = instruction.x;
                 if (newPath) { break; }
             }
         }
@@ -493,7 +520,7 @@ namespace Valve.VR.InteractionSystem
                 if (newPath) { print("here"); break; }
 
                 distanceToTravel = instructions.Distances[i];
-                StartCoroutine(MoveAlongBBPathSegment(robot, linearSpeed, 0f, distanceToTravel));
+                StartCoroutine(MoveAlongBBPathSegment(robot, Mathf.Sign(instructions.Distances[i]) * linearSpeed, 0f, distanceToTravel));
 
                 if (newPath) { print("heres"); break; }
             }
