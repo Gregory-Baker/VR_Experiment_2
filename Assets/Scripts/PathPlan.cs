@@ -455,5 +455,200 @@ public class PathPlan : MonoBehaviour
 
         return linearSamplePoints;
     }
+
+    public class RSpoint
+    {
+        public int N { get; set; }
+        public Vector3 X { get; set; }
+        public float Theta { get; set; }
+        public float G { get; set; }
+        public float H { get; set; }
+        public float F { get; set; }
+        public int N_p { get; set; }
+        public int S { get; set; }
+        public int T { get; set; }
+
+        public RSpoint(int nodeIndex,
+            Vector3 position,
+            float heading,
+            float costFromRoot,
+            float estimatedCostToGoal,
+            float estimatedTotalCost,
+            int parentIndex,
+            int segmentIndex)
+        {
+            N = nodeIndex;
+            X = position;
+            Theta = heading;
+            G = costFromRoot;
+            H = estimatedCostToGoal;
+            F = estimatedTotalCost;
+            N_p = parentIndex;
+            S = segmentIndex;
+        }
+
+        public RSpoint(RSpoint nodeToClone)
+        {
+            N = nodeToClone.N;
+            X = nodeToClone.X;
+            Theta = nodeToClone.Theta;
+            G = nodeToClone.G;
+            H = nodeToClone.H;
+            F = nodeToClone.F;
+            N_p = nodeToClone.N_p;
+            S = nodeToClone.S;
+        }
+    }
+
+
+    public class PathParams
+    {
+        public float R_turn { get; set; } // agent turning radius
+        public float R_max { get; set; } // waypoint accuracy radius
+        public float L { get; set; } // chord length
+        public bool ShowPoints { get; set; }
+        public Vector2[] Delta_XY { get; set; } = new Vector2[3]; // path segment deltas
+
+        public PathParams(float robotTurnRadius,
+            float waypointAccuracyRad,
+            float chordLength,
+            bool showPoints = false)
+        {
+            R_turn = robotTurnRadius;
+            R_max = waypointAccuracyRad;
+            L = chordLength;
+            ShowPoints = showPoints;
+
+            Delta_XY[0].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
+            Delta_XY[0].y = robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
+            Delta_XY[1].x = chordLength;
+            Delta_XY[2].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
+            Delta_XY[2].y = -robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
+        }
+    }
+
+    public static IEnumerator HybridAStarPath(Vector3 startPos, float startHead, Vector3 goalPos1, PathParams pathParams)
+    {
+
+        List<RSpoint> openNodes = new List<RSpoint>();
+        List<RSpoint> closedNodes = new List<RSpoint>();
+
+        //float robotHeadingRad = Mathf.Deg2Rad * robot.transform.eulerAngles.y;
+
+        int nodeCounter = 0;
+
+        print("here");
+
+        List<Vector2> plannedPath = new List<Vector2>();
+
+        float costToGoal = CostToGoal(startPos, goalPos1, pathParams.R_max);
+        RSpoint startPoint = new RSpoint(nodeCounter, startPos, startHead, 0, costToGoal, costToGoal, 0, 1);
+
+        openNodes.Add(startPoint);
+        nodeCounter++;
+        while (openNodes.Count > 0)
+        {
+            var chosenNode = openNodes.Find(x => x.F == openNodes.Min(y => y.F));
+
+            openNodes.Remove(chosenNode);
+            closedNodes.Add(chosenNode);
+
+            if (chosenNode.H < pathParams.R_max)
+            {
+                var pathPoints = BuildPath(closedNodes, chosenNode.N);
+                var pathPointPositions = FindPathPositions(pathPoints);
+                yield break;
+            }
+            else
+            {
+                nodeCounter = UpdateNeighbours(chosenNode, goalPos1, nodeCounter, pathParams, ref openNodes, ref closedNodes);
+            }
+            yield return null;
+        }
+        print("done");
+        yield break;
+    }
+
+    public static int UpdateNeighbours(RSpoint Node, Vector3 goalPos, int nodeCounter, PathParams pathParams, ref List<RSpoint> openNodes, ref List<RSpoint> closedNodes)
+    {
+        foreach (Vector2 delta in pathParams.Delta_XY)
+        {
+            RSpoint newPoint = new RSpoint(Node);
+            newPoint.N_p = Node.N;
+            newPoint.N = nodeCounter;
+            newPoint.X += Vector3.forward * (delta.x * Mathf.Cos(Node.Theta) + delta.y * Mathf.Sin(Node.Theta));
+            newPoint.X += Vector3.right * (delta.x * Mathf.Sin(Node.Theta) - delta.y * Mathf.Cos(Node.Theta));
+
+            if (pathParams.ShowPoints)
+            {
+                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
+                cube.transform.position = newPoint.X;
+                cube.GetComponent<Collider>().enabled = false;
+            }
+
+            if (delta.y > 0.001)
+            {
+                newPoint.Theta = Node.Theta - pathParams.L / pathParams.R_turn;
+            }
+            else if (delta.y < -0.001)
+            {
+                newPoint.Theta = Node.Theta + pathParams.L / pathParams.R_turn;
+            }
+            newPoint.G = Node.G + pathParams.L;
+            newPoint.H = CostToGoal(newPoint.X, goalPos, pathParams.R_max);
+            float newTotalCost = newPoint.G + 1.05f * newPoint.H;
+            newPoint.F = newTotalCost;
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(newPoint.X, out hit, 0.1f, NavMesh.AllAreas))
+            {
+                openNodes.Add(newPoint);
+            }
+            else
+            {
+                closedNodes.Add(newPoint);
+            }
+            nodeCounter++;
+        }
+        return nodeCounter;
+    }
+
+
+    public static List<Vector3> FindPathPositions(List<RSpoint> pathPoints)
+    {
+        List<Vector3> pathPointPositions = new List<Vector3>();
+
+        foreach (RSpoint pathPoint in pathPoints)
+        {
+            pathPointPositions.Add(pathPoint.X);
+        }
+
+        return pathPointPositions;
+    }
+
+    public static List<RSpoint> BuildPath(List<RSpoint> closedNodes, int finalNodeIndex)
+    {
+        List<RSpoint> pathPoints = new List<RSpoint>();
+
+        int currentNodeIndex = finalNodeIndex;
+
+        while (currentNodeIndex != 0)
+        {
+            var currentNode = closedNodes.Find(x => x.N == currentNodeIndex);
+            pathPoints.Add(currentNode);
+
+            currentNodeIndex = closedNodes.Find(x => x.N == currentNodeIndex).N_p;
+        }
+        pathPoints.Add(closedNodes.Find(x => x.N == 0));
+
+        return pathPoints;
+    }
+
+
+    public static float CostToGoal(Vector3 pos, Vector3 goalPos, float r_max)
+    {
+        float cost = Vector3.Distance(pos, goalPos) - r_max;
+        return cost;
+    }
 }
 
