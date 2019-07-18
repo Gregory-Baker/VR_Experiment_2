@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using System.Linq;
+using Valve.VR.InteractionSystem;
 
 public class PathPlan : MonoBehaviour
 {
@@ -475,7 +476,8 @@ public class PathPlan : MonoBehaviour
             float estimatedCostToGoal,
             float estimatedTotalCost,
             int parentIndex,
-            int segmentIndex)
+            int segmentIndex,
+            int turnValue = 0)
         {
             N = nodeIndex;
             X = position;
@@ -485,6 +487,7 @@ public class PathPlan : MonoBehaviour
             F = estimatedTotalCost;
             N_p = parentIndex;
             S = segmentIndex;
+            T = turnValue;
         }
 
         public RSpoint(RSpoint nodeToClone)
@@ -497,6 +500,7 @@ public class PathPlan : MonoBehaviour
             F = nodeToClone.F;
             N_p = nodeToClone.N_p;
             S = nodeToClone.S;
+            T = 0;
         }
     }
 
@@ -527,17 +531,13 @@ public class PathPlan : MonoBehaviour
         }
     }
 
-    public static IEnumerator HybridAStarPath(Vector3 startPos, float startHead, Vector3 goalPos1, PathParams pathParams)
+    public static IEnumerator HybridAStarPath(Vector3 startPos, float startHead, Vector3 goalPos1, PathParams pathParams, LineRenderer line)
     {
 
         List<RSpoint> openNodes = new List<RSpoint>();
         List<RSpoint> closedNodes = new List<RSpoint>();
 
-        //float robotHeadingRad = Mathf.Deg2Rad * robot.transform.eulerAngles.y;
-
         int nodeCounter = 0;
-
-        print("here");
 
         List<Vector2> plannedPath = new List<Vector2>();
 
@@ -557,11 +557,13 @@ public class PathPlan : MonoBehaviour
             {
                 var pathPoints = BuildPath(closedNodes, chosenNode.N);
                 var pathPointPositions = FindPathPositions(pathPoints);
+
+                OnDrawGizmosSelected(line, pathPointPositions);
                 yield break;
             }
             else
             {
-                nodeCounter = UpdateNeighbours(chosenNode, goalPos1, nodeCounter, pathParams, ref openNodes, ref closedNodes);
+                UpdateNeighbours(chosenNode, goalPos1, ref nodeCounter, pathParams, ref openNodes, ref closedNodes);
             }
             yield return null;
         }
@@ -569,7 +571,7 @@ public class PathPlan : MonoBehaviour
         yield break;
     }
 
-    public static int UpdateNeighbours(RSpoint Node, Vector3 goalPos, int nodeCounter, PathParams pathParams, ref List<RSpoint> openNodes, ref List<RSpoint> closedNodes)
+    public static void UpdateNeighbours(RSpoint Node, Vector3 goalPos, ref int nodeCounter, PathParams pathParams, ref List<RSpoint> openNodes, ref List<RSpoint> closedNodes)
     {
         foreach (Vector2 delta in pathParams.Delta_XY)
         {
@@ -589,12 +591,15 @@ public class PathPlan : MonoBehaviour
 
             if (delta.y > 0.001)
             {
-                newPoint.Theta = Node.Theta - pathParams.L / pathParams.R_turn;
+                newPoint.T = -1;
+                
             }
             else if (delta.y < -0.001)
             {
-                newPoint.Theta = Node.Theta + pathParams.L / pathParams.R_turn;
+                newPoint.T = 1;
             }
+
+            newPoint.Theta = Node.Theta + newPoint.T * pathParams.L / pathParams.R_turn;
             newPoint.G = Node.G + pathParams.L;
             newPoint.H = CostToGoal(newPoint.X, goalPos, pathParams.R_max);
             float newTotalCost = newPoint.G + 1.05f * newPoint.H;
@@ -610,7 +615,6 @@ public class PathPlan : MonoBehaviour
             }
             nodeCounter++;
         }
-        return nodeCounter;
     }
 
 
@@ -641,6 +645,8 @@ public class PathPlan : MonoBehaviour
         }
         pathPoints.Add(closedNodes.Find(x => x.N == 0));
 
+        pathPoints.Reverse();
+        
         return pathPoints;
     }
 
@@ -649,6 +655,19 @@ public class PathPlan : MonoBehaviour
     {
         float cost = Vector3.Distance(pos, goalPos) - r_max;
         return cost;
+    }
+
+    public static void OnDrawGizmosSelected(LineRenderer line, List<Vector3> path)
+    {
+        line.positionCount = path.Count;
+
+        int i = 0;
+
+        foreach (Vector3 node in path)
+        {
+            line.SetPosition(i, node);
+            i++;
+        }
     }
 }
 

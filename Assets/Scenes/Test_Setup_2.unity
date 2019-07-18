@@ -4724,9 +4724,9 @@ MonoBehaviour:
   robotRad: 1
   linearSpeed: 0.5
   waypoints: []
-  waypointAccuracyRad: 1
+  waypointAccuracyRad: 0.2
   robotTurnRadius: 2
-  chordLength: 0.4
+  chordLength: 0.3
   cubes: []
 --- !u!114 &470128475 stripped
 MonoBehaviour:

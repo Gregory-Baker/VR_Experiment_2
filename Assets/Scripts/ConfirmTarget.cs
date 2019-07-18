@@ -31,17 +31,12 @@ namespace Valve.VR.InteractionSystem
         [Header("Stop and Turn")]
         public bool stopAndTurnOn = true;
         public float robotRad;
-        //public float targetInFrontAngle = 35f;
-        //public float targetBehindAngle = 100f;
         public float linearSpeed = 0.5f;
         float angularSpeed;
-        //public float veryCloseToTargetRad = 4f;
-        //public float targetCloseFrontAngle = 20f;
 
         Vector3 targetPosition;
 
         public List<Vector2> waypoints = new List<Vector2>();
-        //float distanceToNextWaypoint;
         public float waypointAccuracyRad = 1f;
         public float robotTurnRadius = 2f;
         public float chordLength = 0.4f;
@@ -49,17 +44,16 @@ namespace Valve.VR.InteractionSystem
         Vector3 robotToTargetVector;
         float angleToTarget;
         float distanceToTarget;
-        Vector2[] deltaXY = new Vector2[3];
 
         bool newPath = false;
-        bool newSegment = false;
 
         bool bbPathPlanning = false;
         bool hybridPathPlanning = true;
+        bool showPathPoints = false;
 
         public List<GameObject> cubes = new List<GameObject>();
+        public List<RSpoint> pathPoints = new List<RSpoint>();
 
-        Coroutine lastRoutine = null;
 
         private void OnEnable()
         {
@@ -77,14 +71,6 @@ namespace Valve.VR.InteractionSystem
             confirmTargetAction.AddOnChangeListener(OnConfirmActionChange, hand.handType);
 
             communicationDelay = robot.GetComponent<Status>().communicationDelay;
-
-
-            // Used in Hybrid a* path planning
-            deltaXY[0].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
-            deltaXY[0].y = robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
-            deltaXY[1].x = chordLength;
-            deltaXY[2].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
-            deltaXY[2].y = -robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
         }
 
         private void OnDisable()
@@ -134,8 +120,9 @@ namespace Valve.VR.InteractionSystem
                     else if (hybridPathPlanning)
                     {
                         float robotHeadingRad = Mathf.Deg2Rad * robot.transform.eulerAngles.y;
-                        PathPlan.PathParams pathParams = new PathPlan.PathParams(robotTurnRadius, waypointAccuracyRad, chordLength, true);
-                        StartCoroutine(PathPlan.HybridAStarPath(robot.transform.position, robotHeadingRad, targetPosition, pathParams));
+                        PathParams pathParams = new PathParams(robotTurnRadius, waypointAccuracyRad, chordLength, showPathPoints);
+                        StartCoroutine(HybridAStarPath(robot.transform.position, robotHeadingRad, targetPosition, pathParams));
+
                     }
                 }
             }
@@ -246,71 +233,9 @@ namespace Valve.VR.InteractionSystem
             MoveTarget(confirmedTarget, targetPosition);
         }
 
-        IEnumerator MoveAlongBBPathCoroutine(float delayTime, PathPlan.BBPathInstructions instructions)
-        {
-            yield return new WaitForSeconds(delayTime);
-
-            for (int i = 0; i < instructions.Angles.Count; i++)
-            {
-                float distanceToTravel;
-
-                float distanceMoved = 0;
-                if (instructions.SatelliteTurns[i])
-                {
-                    distanceToTravel = Mathf.Sign(instructions.Angles[i]) * robotTurnRadius * pi / 3;
-
-                    while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
-                    {
-                        distanceMoved += MoveRobotOneStep(robot, linearSpeed, Mathf.Sign(instructions.Angles[i]) * angularSpeed);
-                        yield return null;
-                    }
-                }
-
-                distanceToTravel = instructions.Angles[i] * robotTurnRadius;
-                distanceMoved = 0;
-
-                while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
-                {
-                    distanceMoved += MoveRobotOneStep(robot, linearSpeed, -Mathf.Sign(instructions.Angles[i]) * angularSpeed);
-                    yield return null;
-                }
-
-                if (instructions.SatelliteTurns[i])
-                {
-                    distanceToTravel = Mathf.Sign(instructions.Angles[i]) * robotTurnRadius * pi / 3;
-                    distanceMoved = 0;
-
-                    while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
-                    {
-                        distanceMoved += MoveRobotOneStep(robot, linearSpeed, Mathf.Sign(instructions.Angles[i]) * angularSpeed);
-                        yield return null;
-                    }
-                }
-
-                distanceToTravel = instructions.Distances[i];
-                distanceMoved = 0;
-
-                while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
-                {
-                    distanceMoved += MoveRobotOneStep(robot, linearSpeed, 0f);
-                    yield return null;
-                }
-            }
-        }
-
-        IEnumerator MoveAlongBBPathSegment(GameObject robot, float linearVelocity, float angularVelocity, float distanceToTravel)
-        {
-            float distanceMoved = 0;
-            while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel) && !newPath)
-            {
-                distanceMoved += MoveRobotOneStep(robot, linearVelocity, angularVelocity);
-                yield return null;
-            }
-        }
-
         IEnumerator MoveAlongBBPath(List<Vector2> instructions, float delayTime = 0)
         {
-            yield return 0;
+            yield return new WaitForSeconds(delayTime);
             newPath = false;
             foreach (Vector2 instruction in instructions)
             {
@@ -336,37 +261,6 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        public void MoveAlongBBPath(float delayTime, PathPlan.BBPathInstructions instructions)
-        {
-            newPath = false;
-            for (int i = 0; i < instructions.Angles.Count; i++)
-            {
-                float distanceToTravel;
-                if (instructions.SatelliteTurns[i])
-                {
-                    distanceToTravel = Mathf.Sign(instructions.Angles[i]) * robotTurnRadius * pi / 3;
-                    StartCoroutine(MoveAlongBBPathSegment(robot, linearSpeed, Mathf.Sign(instructions.Angles[i]) * angularSpeed, distanceToTravel));
-                }
-                if (newPath) { print("here");  break; }
-
-                distanceToTravel = instructions.Angles[i] * robotTurnRadius;
-                StartCoroutine(MoveAlongBBPathSegment(robot, linearSpeed, -Mathf.Sign(instructions.Angles[i]) * angularSpeed, distanceToTravel));
-                if (newPath) { print("herea"); break; }
-
-                if (instructions.SatelliteTurns[i])
-                {
-                    distanceToTravel = Mathf.Sign(instructions.Angles[i]) * robotTurnRadius * pi / 3;
-                    StartCoroutine(MoveAlongBBPathSegment(robot, linearSpeed, Mathf.Sign(instructions.Angles[i]) * angularSpeed, distanceToTravel));
-                }
-                if (newPath) { print("here"); break; }
-
-                distanceToTravel = instructions.Distances[i];
-                StartCoroutine(MoveAlongBBPathSegment(robot, Mathf.Sign(instructions.Distances[i]) * linearSpeed, 0f, distanceToTravel));
-
-                if (newPath) { print("heres"); break; }
-            }
-        }
-
         public static float MoveRobotOneStep(GameObject robot, float linearVelocity, float angularVelocity)
         {
             float distanceMoved = linearVelocity * Time.deltaTime;
@@ -377,7 +271,7 @@ namespace Valve.VR.InteractionSystem
             return distanceMoved;
         }
 
-        void OnDrawGizmosSelected(LineRenderer line, Vector3[] path)
+        public void OnDrawGizmosSelected(LineRenderer line, Vector3[] path)
         {
             line.positionCount = path.Length;
 
@@ -390,7 +284,7 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        void OnDrawGizmosSelected(LineRenderer line, List<Vector3> path)
+        public void OnDrawGizmosSelected(LineRenderer line, List<Vector3> path)
         {
             line.positionCount = path.Count;
 
@@ -402,6 +296,248 @@ namespace Valve.VR.InteractionSystem
                 i++;
             }
 
+        }
+
+        public class RSpoint
+        {
+            public int N { get; set; }
+            public Vector3 X { get; set; }
+            public float Theta { get; set; }
+            public float G { get; set; }
+            public float H { get; set; }
+            public float F { get; set; }
+            public int N_p { get; set; }
+            public int S { get; set; }
+            public int Gear { get; set; }
+            public bool GearChange { get; set; }
+            public int T { get; set; }
+
+            public RSpoint(int nodeIndex,
+                Vector3 position,
+                float heading,
+                float costFromRoot,
+                float estimatedCostToGoal,
+                float estimatedTotalCost,
+                int parentIndex,
+                int segmentIndex,
+                int gearValue = 1,
+                bool gearChangeValue = false,
+                int turnValue = 0)
+            {
+                N = nodeIndex;
+                X = position;
+                Theta = heading;
+                G = costFromRoot;
+                H = estimatedCostToGoal;
+                F = estimatedTotalCost;
+                N_p = parentIndex;
+                S = segmentIndex;
+                Gear = gearValue;
+                GearChange = gearChangeValue;
+                T = turnValue;
+
+            }
+
+            public RSpoint(RSpoint nodeToClone)
+            {
+                N = nodeToClone.N;
+                X = nodeToClone.X;
+                Theta = nodeToClone.Theta;
+                G = nodeToClone.G;
+                H = nodeToClone.H;
+                F = nodeToClone.F;
+                N_p = nodeToClone.N_p;
+                S = nodeToClone.S;
+                Gear = 1;
+                GearChange = false;
+                T = 0;
+            }
+        }
+
+
+        public class PathParams
+        {
+            public float R_turn { get; set; } // agent turning radius
+            public float R_max { get; set; } // waypoint accuracy radius
+            public float L { get; set; } // chord length
+            public bool ShowPoints { get; set; }
+            public Vector2[] Delta_XY { get; set; } = new Vector2[6]; // path segment deltas
+
+            public PathParams(float robotTurnRadius,
+                float waypointAccuracyRad,
+                float chordLength,
+                bool showPoints = false)
+            {
+                R_turn = robotTurnRadius;
+                R_max = waypointAccuracyRad;
+                L = chordLength;
+                ShowPoints = showPoints;
+
+                Delta_XY[0].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
+                Delta_XY[0].y = robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
+                Delta_XY[1].x = chordLength;
+                Delta_XY[2].x = robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
+                Delta_XY[2].y = -robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
+
+                Delta_XY[3].x = -robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
+                Delta_XY[3].y = -robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
+                Delta_XY[4].x = -chordLength;
+                Delta_XY[5].x = -robotTurnRadius * Mathf.Sin(chordLength / robotTurnRadius);
+                Delta_XY[5].y = robotTurnRadius * (1 - Mathf.Cos(chordLength / robotTurnRadius));
+            }
+        }
+
+        public IEnumerator HybridAStarPath(Vector3 startPos, float startHead, Vector3 goalPos1, PathParams pathParams)
+        {
+            List<RSpoint> openNodes = new List<RSpoint>();
+            List<RSpoint> closedNodes = new List<RSpoint>();
+
+            int nodeCounter = 0;
+
+            List<Vector2> plannedPath = new List<Vector2>();
+
+            float costToGoal = CostToGoal(startPos, goalPos1, pathParams.R_max);
+            RSpoint startPoint = new RSpoint(nodeCounter, startPos, startHead, 0, costToGoal, costToGoal, 0, 1);
+
+            openNodes.Add(startPoint);
+            nodeCounter++;
+            while (openNodes.Count > 0)
+            {
+                var chosenNode = openNodes.Find(x => x.F == openNodes.Min(y => y.F));
+
+                openNodes.Remove(chosenNode);
+                closedNodes.Add(chosenNode);
+
+                if (chosenNode.H < pathParams.R_max)
+                {
+                    pathPoints = BuildPath(closedNodes, chosenNode.N);
+                    var pathPointPositions = FindPathPositions(pathPoints);
+                    OnDrawGizmosSelected(line, pathPointPositions);
+
+                    StartCoroutine(MoveAlongAStarPath(pathPoints));
+                    yield break;
+                }
+                else
+                {
+                    UpdateNeighbours(chosenNode, goalPos1, ref nodeCounter, pathParams, ref openNodes, ref closedNodes);
+                }
+                yield return null;
+            }
+            print("done");
+            yield break;
+        }
+
+        public void UpdateNeighbours(RSpoint Node, Vector3 goalPos, ref int nodeCounter, PathParams pathParams, ref List<RSpoint> openNodes, ref List<RSpoint> closedNodes)
+        {
+            foreach (Vector2 delta in pathParams.Delta_XY)
+            {
+                RSpoint newPoint = new RSpoint(Node);
+                newPoint.N_p = Node.N;
+                newPoint.N = nodeCounter;
+                newPoint.X += Vector3.forward * (delta.x * Mathf.Cos(Node.Theta) + delta.y * Mathf.Sin(Node.Theta));
+                newPoint.X += Vector3.right * (delta.x * Mathf.Sin(Node.Theta) - delta.y * Mathf.Cos(Node.Theta));
+                if (delta.x < 0)
+                {
+                    newPoint.Gear = -1;
+                }
+                if (Node.Gear != newPoint.Gear)
+                {
+                    newPoint.GearChange = true;
+                }
+
+                if (pathParams.ShowPoints)
+                {
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
+                    cube.transform.position = newPoint.X;
+                    cube.GetComponent<Collider>().enabled = false;
+                }
+
+                if (delta.y > 0.001)
+                {
+                    newPoint.T = -1;
+
+                }
+                else if (delta.y < -0.001)
+                {
+                    newPoint.T = 1;
+                }
+
+                newPoint.Theta = Node.Theta + newPoint.T * pathParams.L / pathParams.R_turn;
+                newPoint.G = Node.G + pathParams.L;
+                newPoint.H = CostToGoal(newPoint.X, goalPos, pathParams.R_max);
+
+                float newTotalCost = newPoint.G + 1.05f * newPoint.H + 0.01f * Mathf.Abs(newPoint.T);
+                newPoint.F = newTotalCost;
+                NavMeshHit hit;
+                if (NavMesh.SamplePosition(newPoint.X, out hit, 0.1f, NavMesh.AllAreas))
+                {
+                    openNodes.Add(newPoint);
+                }
+                else
+                {
+                    closedNodes.Add(newPoint);
+                }
+                nodeCounter++;
+            }
+        }
+
+
+        public static List<Vector3> FindPathPositions(List<RSpoint> pathPoints)
+        {
+            List<Vector3> pathPointPositions = new List<Vector3>();
+
+            foreach (RSpoint pathPoint in pathPoints)
+            {
+                pathPointPositions.Add(pathPoint.X);
+            }
+
+            return pathPointPositions;
+        }
+
+        public static List<RSpoint> BuildPath(List<RSpoint> closedNodes, int finalNodeIndex)
+        {
+            List<RSpoint> pathPoints = new List<RSpoint>();
+
+            int currentNodeIndex = finalNodeIndex;
+
+            while (currentNodeIndex != 0)
+            {
+                var currentNode = closedNodes.Find(x => x.N == currentNodeIndex);
+                pathPoints.Add(currentNode);
+
+                currentNodeIndex = closedNodes.Find(x => x.N == currentNodeIndex).N_p;
+            }
+            pathPoints.Add(closedNodes.Find(x => x.N == 0));
+
+            pathPoints.Reverse();
+
+            return pathPoints;
+        }
+
+        IEnumerator MoveAlongAStarPath(List<RSpoint> pathPoints, float delayTime = 0)
+        {
+            yield return new WaitForSeconds(delayTime);
+
+            foreach (RSpoint point in pathPoints)
+            {
+                float distanceToTravel = chordLength;
+                float distanceMoved = 0;
+                if (point.N != 0)
+                {
+                    while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
+                    {
+                        distanceMoved += MoveRobotOneStep(robot, point.Gear * linearSpeed, point.T * angularSpeed);
+                        yield return null;
+                    }
+                }
+            }
+        }
+
+        public static float CostToGoal(Vector3 pos, Vector3 goalPos, float r_max)
+        {
+            float cost = Vector3.Distance(pos, goalPos) - r_max;
+            return cost;
         }
     }
 }
