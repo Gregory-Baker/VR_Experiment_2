@@ -36,7 +36,7 @@ namespace Valve.VR.InteractionSystem
 
         Vector3 targetPosition;
 
-        public List<Vector2> waypoints = new List<Vector2>();
+        public List<Vector3> waypoints = new List<Vector3>();
         public float waypointAccuracyRad = 1f;
         public float robotTurnRadius = 2f;
         public float chordLength = 0.4f;
@@ -46,6 +46,7 @@ namespace Valve.VR.InteractionSystem
         float distanceToTarget;
 
         bool newPath = false;
+        bool newPathPlan = false;
 
         bool bbPathPlanning = false;
         bool hybridPathPlanning = true;
@@ -53,7 +54,6 @@ namespace Valve.VR.InteractionSystem
 
         public List<GameObject> cubes = new List<GameObject>();
         public List<RSpoint> pathPoints = new List<RSpoint>();
-
 
         private void OnEnable()
         {
@@ -90,7 +90,7 @@ namespace Valve.VR.InteractionSystem
 
                 CreateWaypointDisk(targetPosition);
 
-                waypoints.Add(PathPlan.V3toV2(targetPosition));
+                waypoints.Add(targetPosition);
 
                 if (waypoints.Count >= 1)
                 {
@@ -101,7 +101,7 @@ namespace Valve.VR.InteractionSystem
 
                         var pathInfo = PathPlan.BBInfo(x1, heading, waypoints, robotTurnRadius);
 
-                        var pathPoints = PathPlan.BBPathPoints(heading, pathInfo, waypoints.Last(), robotTurnRadius, 0.1f);
+                        var pathPoints = PathPlan.BBPathPoints(heading, pathInfo, PathPlan.V3toV2(waypoints.Last()), robotTurnRadius, 0.1f);
                         DeletePathPoints();
                         ShowPathPoints(pathPoints);
 
@@ -121,7 +121,8 @@ namespace Valve.VR.InteractionSystem
                     {
                         float robotHeadingRad = Mathf.Deg2Rad * robot.transform.eulerAngles.y;
                         PathParams pathParams = new PathParams(robotTurnRadius, waypointAccuracyRad, chordLength, showPathPoints);
-                        StartCoroutine(HybridAStarPath(robot.transform.position, robotHeadingRad, targetPosition, pathParams));
+                        newPathPlan = true;
+                        StartCoroutine(HybridAStarPath(robot.transform.position, robotHeadingRad, waypoints, pathParams));
 
                     }
                 }
@@ -198,10 +199,10 @@ namespace Valve.VR.InteractionSystem
         {
             if (waypoints.Count > 0)
             {
-                Vector3 waypoint_3d = PathPlan.V2toV3(waypoints[0]);
-                float distanceToNextWaypoint = Vector3.Distance(waypoint_3d, robot.transform.position);
+                // Vector3 waypoint_3d = PathPlan.V2toV3(waypoints[0]);
+                float distanceToNextWaypoint = Vector3.Distance(waypoints[0], robot.transform.position);
 
-                if (distanceToNextWaypoint < waypointAccuracyRad)
+                if (distanceToNextWaypoint < 2 * waypointAccuracyRad)
                 {
                     waypoints.RemoveAt(0);
                 }
@@ -308,9 +309,11 @@ namespace Valve.VR.InteractionSystem
             public float F { get; set; }
             public int N_p { get; set; }
             public int S { get; set; }
+            public int N_w { get; set; }
             public int Gear { get; set; }
             public bool GearChange { get; set; }
             public int T { get; set; }
+            public int TurnChange { get; set; }
 
             public RSpoint(int nodeIndex,
                 Vector3 position,
@@ -320,9 +323,11 @@ namespace Valve.VR.InteractionSystem
                 float estimatedTotalCost,
                 int parentIndex,
                 int segmentIndex,
+                int waypointIndex,
                 int gearValue = 1,
                 bool gearChangeValue = false,
-                int turnValue = 0)
+                int turnValue = 0,
+                int turnChange = 0)
             {
                 N = nodeIndex;
                 X = position;
@@ -332,10 +337,11 @@ namespace Valve.VR.InteractionSystem
                 F = estimatedTotalCost;
                 N_p = parentIndex;
                 S = segmentIndex;
+                N_w = waypointIndex;
                 Gear = gearValue;
                 GearChange = gearChangeValue;
                 T = turnValue;
-
+                TurnChange = turnChange;
             }
 
             public RSpoint(RSpoint nodeToClone)
@@ -348,9 +354,11 @@ namespace Valve.VR.InteractionSystem
                 F = nodeToClone.F;
                 N_p = nodeToClone.N_p;
                 S = nodeToClone.S;
+                N_w = nodeToClone.N_w;
                 Gear = 1;
                 GearChange = false;
                 T = 0;
+                TurnChange = 0;
             }
         }
 
@@ -387,21 +395,25 @@ namespace Valve.VR.InteractionSystem
             }
         }
 
-        public IEnumerator HybridAStarPath(Vector3 startPos, float startHead, Vector3 goalPos1, PathParams pathParams)
+        public IEnumerator HybridAStarPath(Vector3 startPos, float startHead, List<Vector3> waypoints, PathParams pathParams)
         {
             List<RSpoint> openNodes = new List<RSpoint>();
             List<RSpoint> closedNodes = new List<RSpoint>();
 
             int nodeCounter = 0;
-
             List<Vector2> plannedPath = new List<Vector2>();
 
-            float costToGoal = CostToGoal(startPos, goalPos1, pathParams.R_max);
-            RSpoint startPoint = new RSpoint(nodeCounter, startPos, startHead, 0, costToGoal, costToGoal, 0, 1);
+            int N_w = 0;
+
+            newPathPlan = false;
+
+            float costToGoal = CostToGoal(startPos, waypoints, 0, pathParams.R_max);
+            RSpoint startPoint = new RSpoint(nodeCounter, startPos, startHead, 0, costToGoal, costToGoal, 0, 1, N_w);
 
             openNodes.Add(startPoint);
             nodeCounter++;
-            while (openNodes.Count > 0)
+
+            while (openNodes.Count > 0 && !newPathPlan)
             {
                 var chosenNode = openNodes.Find(x => x.F == openNodes.Min(y => y.F));
 
@@ -411,15 +423,16 @@ namespace Valve.VR.InteractionSystem
                 if (chosenNode.H < pathParams.R_max)
                 {
                     pathPoints = BuildPath(closedNodes, chosenNode.N);
+                    print("here");
                     var pathPointPositions = FindPathPositions(pathPoints);
                     OnDrawGizmosSelected(line, pathPointPositions);
-
+                    newPath = true;
                     StartCoroutine(MoveAlongAStarPath(pathPoints));
                     yield break;
                 }
                 else
                 {
-                    UpdateNeighbours(chosenNode, goalPos1, ref nodeCounter, pathParams, ref openNodes, ref closedNodes);
+                    UpdateNeighbours(chosenNode, waypoints, ref nodeCounter, pathParams, ref openNodes, ref closedNodes);
                 }
                 yield return null;
             }
@@ -427,7 +440,7 @@ namespace Valve.VR.InteractionSystem
             yield break;
         }
 
-        public void UpdateNeighbours(RSpoint Node, Vector3 goalPos, ref int nodeCounter, PathParams pathParams, ref List<RSpoint> openNodes, ref List<RSpoint> closedNodes)
+        public void UpdateNeighbours(RSpoint Node, List<Vector3> waypoints, ref int nodeCounter, PathParams pathParams, ref List<RSpoint> openNodes, ref List<RSpoint> closedNodes)
         {
             foreach (Vector2 delta in pathParams.Delta_XY)
             {
@@ -463,11 +476,20 @@ namespace Valve.VR.InteractionSystem
                     newPoint.T = 1;
                 }
 
+                newPoint.TurnChange += Mathf.Abs(newPoint.T - Node.T);
+
+                if (CostToGoal(Node.X, waypoints[Node.N_w], pathParams.R_max) < pathParams.R_max && Node.N_w < (waypoints.Count - 1))
+                {
+                    newPoint.N_w = Node.N_w + 1;
+                }
+                print(newPoint.N_w);
+
                 newPoint.Theta = Node.Theta + newPoint.T * pathParams.L / pathParams.R_turn;
                 newPoint.G = Node.G + pathParams.L;
-                newPoint.H = CostToGoal(newPoint.X, goalPos, pathParams.R_max);
+                newPoint.H = CostToGoal(newPoint.X, waypoints, newPoint.N_w, pathParams.R_max);
+                print(newPoint.H);
 
-                float newTotalCost = newPoint.G + 1.05f * newPoint.H + 0.01f * Mathf.Abs(newPoint.T);
+                float newTotalCost = newPoint.G + 1.05f * newPoint.H + 0.05f * Mathf.Abs(newPoint.TurnChange);
                 newPoint.F = newTotalCost;
                 NavMeshHit hit;
                 if (NavMesh.SamplePosition(newPoint.X, out hit, 0.1f, NavMesh.AllAreas))
@@ -519,17 +541,20 @@ namespace Valve.VR.InteractionSystem
         {
             yield return new WaitForSeconds(delayTime);
 
+            newPath = false;
+
             foreach (RSpoint point in pathPoints)
             {
                 float distanceToTravel = chordLength;
                 float distanceMoved = 0;
                 if (point.N != 0)
                 {
-                    while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel))
+                    while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel) && !newPath)
                     {
                         distanceMoved += MoveRobotOneStep(robot, point.Gear * linearSpeed, point.T * angularSpeed);
                         yield return null;
                     }
+                    if (newPath) { break; }
                 }
             }
         }
@@ -537,6 +562,19 @@ namespace Valve.VR.InteractionSystem
         public static float CostToGoal(Vector3 pos, Vector3 goalPos, float r_max)
         {
             float cost = Vector3.Distance(pos, goalPos) - r_max;
+            return cost;
+        }
+
+        public static float CostToGoal(Vector3 pos, List<Vector3> waypoints, int currentWaypoint, float r_max)
+        {
+            float cost = 0;
+            cost += CostToGoal(pos, waypoints[currentWaypoint], r_max);
+
+            for (int i = currentWaypoint; i < waypoints.Count - 1; i++)
+            {
+                print(i);
+                cost += Vector3.Distance(waypoints[currentWaypoint], waypoints[currentWaypoint + 1]); // - r_max;
+            }
             return cost;
         }
     }
