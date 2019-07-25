@@ -50,10 +50,11 @@ namespace Valve.VR.InteractionSystem
 
         bool bbPathPlanning = false;
         bool hybridPathPlanning = true;
-        bool showPathPoints = false;
+        bool showPathPoints = true;
 
         public List<GameObject> cubes = new List<GameObject>();
         public List<RSpoint> pathPoints = new List<RSpoint>();
+        public List<GameObject> waypointDisks = new List<GameObject>();
 
         private void OnEnable()
         {
@@ -84,47 +85,63 @@ namespace Valve.VR.InteractionSystem
             if (newValue)
             {
                 //MoveTarget(interimTarget, robot.transform.position);
+                print("new path");
 
                 targetPosition = selectedTarget.transform.position;
                 targetPosition.y += verticalOffset;
 
-                CreateWaypointDisk(targetPosition);
+                NavMeshHit hit;
+                if (!NavMesh.SamplePosition(targetPosition, out hit, 0.1f, NavMesh.AllAreas))
+                {
+                    NavMesh.FindClosestEdge(targetPosition, out hit, NavMesh.AllAreas);
+                    print("outside navmesh");
+                    targetPosition = hit.position;
+                    targetPosition.y = verticalOffset;
+                }
 
-                waypoints.Add(targetPosition);
+                if (waypoints.Count == 0 || Vector3.Distance(targetPosition, waypoints[waypoints.Count - 1]) > 0.1)
+                {
+                    CreateWaypointDisk(targetPosition);
+                    waypoints.Add(targetPosition);
+                }
+
 
                 if (waypoints.Count >= 1)
                 {
-                    if (bbPathPlanning)
+                    Vector2 x1 = PathPlan.V3toV2(robot.transform.position);
+                    float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi / 2;
+
+                    var pathInfo = PathPlan.BBInfo(x1, heading, waypoints, robotTurnRadius, 2* waypointAccuracyRad);
+
+                    var pathPoints = PathPlan.BBPathPoints(heading, pathInfo, PathPlan.V3toV2(waypoints.Last()), robotTurnRadius, 0.1f);
+                    if (showPathPoints)
                     {
-                        Vector2 x1 = PathPlan.V3toV2(robot.transform.position);
-                        float heading = -Mathf.Deg2Rad * robot.transform.eulerAngles.y + pi / 2;
-
-                        var pathInfo = PathPlan.BBInfo(x1, heading, waypoints, robotTurnRadius);
-
-                        var pathPoints = PathPlan.BBPathPoints(heading, pathInfo, PathPlan.V3toV2(waypoints.Last()), robotTurnRadius, 0.1f);
                         DeletePathPoints();
                         ShowPathPoints(pathPoints);
+                    }
 
-                        if (PathPlan.CheckPathPoints(pathPoints))
-                        {
-                            var pathInstructions = PathPlan.BBInstructions(pathInfo);
-                            print("new instructions");
-                            PathPlan.PrintBBPathInstructions(pathInstructions);
-                            var unpackedInstructions = PathPlan.UnpackPathInstructions(pathInstructions);
-                            OnDrawGizmosSelected(line, pathPoints);
-                            newPath = true;
-                            StartCoroutine(MoveAlongBBPath(unpackedInstructions));
-                        }
-                        else { print("path not feasible"); }
+                    var pathInstructions = PathPlan.BBInstructions(pathInfo);
+                    var unpackedInstructions = PathPlan.UnpackPathInstructions(pathInstructions);
+                    
+
+                    if (bbPathPlanning && PathPlan.CheckPathPoints(pathPoints) && pathInstructions.Distances.Min() > 0)
+                    {
+                        PathPlan.PrintBBPathInstructions(pathInstructions);
+                        OnDrawGizmosSelected(line, pathPoints);
+                        newPath = true;
+                        StartCoroutine(MoveAlongBBPath(unpackedInstructions));
                     }
                     else if (hybridPathPlanning)
                     {
                         float robotHeadingRad = Mathf.Deg2Rad * robot.transform.eulerAngles.y;
                         PathParams pathParams = new PathParams(robotTurnRadius, waypointAccuracyRad, chordLength, showPathPoints);
                         newPathPlan = true;
-                        StartCoroutine(HybridAStarPath(robot.transform.position, robotHeadingRad, waypoints, pathParams));
+                        var startPos = robot.transform.position;
+                        startPos.y += verticalOffset;
+                        StartCoroutine(HybridAStarPath(startPos, robotHeadingRad, waypoints, pathParams));
 
                     }
+                    else { print("path not feasible"); }
                 }
             }
         }
@@ -156,6 +173,7 @@ namespace Valve.VR.InteractionSystem
             disk.transform.position = targetPosition;
             disk.GetComponent<Collider>().enabled = false;
             disk.GetComponent<Renderer>().material.color = Color.green;
+            waypointDisks.Add(disk);
         }
 
         private void MoveToWaypoint(Vector3 waypointPosition)
@@ -205,6 +223,8 @@ namespace Valve.VR.InteractionSystem
                 if (distanceToNextWaypoint < 2 * waypointAccuracyRad)
                 {
                     waypoints.RemoveAt(0);
+                    Destroy(waypointDisks[0]);
+                    waypointDisks.RemoveAt(0);
                 }
             }
         }
@@ -242,6 +262,7 @@ namespace Valve.VR.InteractionSystem
             {
                 float distanceToTravel;
                 float angularVelocity = 0;
+                float linearVelocity = linearSpeed;
                 if (instruction.x == 1)
                 {
                     distanceToTravel = instruction.y * robotTurnRadius;
@@ -250,12 +271,13 @@ namespace Valve.VR.InteractionSystem
                 else
                 {
                     distanceToTravel = instruction.y;
+                    linearVelocity = Mathf.Sign(instruction.y) * linearSpeed;
                 }
 
                 float distanceMoved = 0;
                 while (Mathf.Abs(distanceMoved) < Mathf.Abs(distanceToTravel) && !newPath)
                 {
-                    distanceMoved += MoveRobotOneStep(robot, linearSpeed, angularVelocity);
+                    distanceMoved += MoveRobotOneStep(robot, linearVelocity, angularVelocity);
                     yield return null;
                 }
                 if (newPath) { break; }
@@ -423,7 +445,6 @@ namespace Valve.VR.InteractionSystem
                 if (chosenNode.H < pathParams.R_max)
                 {
                     pathPoints = BuildPath(closedNodes, chosenNode.N);
-                    print("here");
                     var pathPointPositions = FindPathPositions(pathPoints);
                     OnDrawGizmosSelected(line, pathPointPositions);
                     newPath = true;
@@ -482,14 +503,12 @@ namespace Valve.VR.InteractionSystem
                 {
                     newPoint.N_w = Node.N_w + 1;
                 }
-                print(newPoint.N_w);
 
                 newPoint.Theta = Node.Theta + newPoint.T * pathParams.L / pathParams.R_turn;
                 newPoint.G = Node.G + pathParams.L;
                 newPoint.H = CostToGoal(newPoint.X, waypoints, newPoint.N_w, pathParams.R_max);
-                print(newPoint.H);
 
-                float newTotalCost = newPoint.G + 1.05f * newPoint.H + 0.05f * Mathf.Abs(newPoint.TurnChange);
+                float newTotalCost = newPoint.G + 1.05f * newPoint.H + 0.05f * Mathf.Abs(newPoint.TurnChange); // + 0.2f * Mathf.Abs(newPoint.T);
                 newPoint.F = newTotalCost;
                 NavMeshHit hit;
                 if (NavMesh.SamplePosition(newPoint.X, out hit, 0.1f, NavMesh.AllAreas))
@@ -572,7 +591,6 @@ namespace Valve.VR.InteractionSystem
 
             for (int i = currentWaypoint; i < waypoints.Count - 1; i++)
             {
-                print(i);
                 cost += Vector3.Distance(waypoints[currentWaypoint], waypoints[currentWaypoint + 1]); // - r_max;
             }
             return cost;
